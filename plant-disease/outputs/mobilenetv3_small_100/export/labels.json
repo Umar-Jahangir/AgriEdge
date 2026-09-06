@@ -1,0 +1,225 @@
+{
+ "img_size": 224,
+ "mean": [
+  0.485,
+  0.456,
+  0.406
+ ],
+ "std": [
+  0.229,
+  0.224,
+  0.225
+ ],
+ "classes": [
+  {
+   "id": 0,
+   "name": "Apple___Apple_scab",
+   "pretty": "Apple: Apple scab"
+  },
+  {
+   "id": 1,
+   "name": "Apple___Black_rot",
+   "pretty": "Apple: Black rot"
+  },
+  {
+   "id": 2,
+   "name": "Apple___Cedar_apple_rust",
+   "pretty": "Apple: Cedar apple rust"
+  },
+  {
+   "id": 3,
+   "name": "Apple___healthy",
+   "pretty": "Apple: healthy"
+  },
+  {
+   "id": 4,
+   "name": "Blueberry___healthy",
+   "pretty": "Blueberry: healthy"
+  },
+  {
+   "id": 5,
+   "name": "Cherry_(including_sour)___Powdery_mildew",
+   "pretty": "Cherry: Powdery mildew"
+  },
+  {
+   "id": 6,
+   "name": "Cherry_(including_sour)___healthy",
+   "pretty": "Cherry: healthy"
+  },
+  {
+   "id": 7,
+   "name": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+   "pretty": "Corn: Cercospora leaf spot Gray leaf spot"
+  },
+  {
+   "id": 8,
+   "name": "Corn_(maize)___Common_rust_",
+   "pretty": "Corn: Common rust"
+  },
+  {
+   "id": 9,
+   "name": "Corn_(maize)___Northern_Leaf_Blight",
+   "pretty": "Corn: Northern Leaf Blight"
+  },
+  {
+   "id": 10,
+   "name": "Corn_(maize)___healthy",
+   "pretty": "Corn: healthy"
+  },
+  {
+   "id": 11,
+   "name": "Grape___Black_rot",
+   "pretty": "Grape: Black rot"
+  },
+  {
+   "id": 12,
+   "name": "Grape___Esca_(Black_Measles)",
+   "pretty": "Grape: Esca (Black Measles)"
+  },
+  {
+   "id": 13,
+   "name": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+   "pretty": "Grape: Leaf blight (Isariopsis Leaf Spot)"
+  },
+  {
+   "id": 14,
+   "name": "Grape___healthy",
+   "pretty": "Grape: healthy"
+  },
+  {
+   "id": 15,
+   "name": "Orange___Haunglongbing_(Citrus_greening)",
+   "pretty": "Orange: Haunglongbing (Citrus greening)"
+  },
+  {
+   "id": 16,
+   "name": "Peach___Bacterial_spot",
+   "pretty": "Peach: Bacterial spot"
+  },
+  {
+   "id": 17,
+   "name": "Peach___healthy",
+   "pretty": "Peach: healthy"
+  },
+  {
+   "id": 18,
+   "name": "Pepper,_bell___Bacterial_spot",
+   "pretty": "Pepper (bell): Bacterial spot"
+  },
+  {
+   "id": 19,
+   "name": "Pepper,_bell___healthy",
+   "pretty": "Pepper (bell): healthy"
+  },
+  {
+   "id": 20,
+   "name": "Potato___Early_blight",
+   "pretty": "Potato: Early blight"
+  },
+  {
+   "id": 21,
+   "name": "Potato___Late_blight",
+   "pretty": "Potato: Late blight"
+  },
+  {
+   "id": 22,
+   "name": "Potato___healthy",
+   "pretty": "Potato: healthy"
+  },
+  {
+   "id": 23,
+   "name": "Raspberry___healthy",
+   "pretty": "Raspberry: healthy"
+  },
+  {
+   "id": 24,
+   "name": "Soybean___healthy",
+   "pretty": "Soybean: healthy"
+  },
+  {
+   "id": 25,
+   "name": "Squash___Powdery_mildew",
+   "pretty": "Squash: Powdery mildew"
+  },
+  {
+   "id": 26,
+   "name": "Strawberry___Leaf_scorch",
+   "pretty": "Strawberry: Leaf scorch"
+  },
+  {
+   "id": 27,
+   "name": "Strawberry___healthy",
+   "pretty": "Strawberry: healthy"
+  },
+  {
+   "id": 28,
+   "name": "Tomato___Bacterial_spot",
+   "pretty": "Tomato: Bacterial spot"
+  },
+  {
+   "id": 29,
+   "name": "Tomato___Early_blight",
+   "pretty": "Tomato: Early blight"
+  },
+  {
+   "id": 30,
+   "name": "Tomato___Late_blight",
+   "pretty": "Tomato: Late blight"
+  },
+  {
+   "id": 31,
+   "name": "Tomato___Leaf_Mold",
+   "pretty": "Tomato: Leaf Mold"
+  },
+  {
+   "id": 32,
+   "name": "Tomato___Septoria_leaf_spot",
+   "pretty": "Tomato: Septoria leaf spot"
+  },
+  {
+   "id": 33,
+   "name": "Tomato___Spider_mites Two-spotted_spider_mite",
+   "pretty": "Tomato: Spider mites Two-spotted spider mite"
+  },
+  {
+   "id": 34,
+   "name": "Tomato___Target_Spot",
+   "pretty": "Tomato: Target Spot"
+  },
+  {
+   "id": 35,
+   "name": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+   "pretty": "Tomato: Tomato Yellow Leaf Curl Virus"
+  },
+  {
+   "id": 36,
+   "name": "Tomato___Tomato_mosaic_virus",
+   "pretty": "Tomato: Tomato mosaic virus"
+  },
+  {
+   "id": 37,
+   "name": "Tomato___healthy",
+   "pretty": "Tomato: healthy"
+  },
+  {
+   "id": 38,
+   "name": "Corn_(maize)___Magnesium_deficiency",
+   "pretty": "Corn: Magnesium deficiency"
+  },
+  {
+   "id": 39,
+   "name": "Corn_(maize)___Nitrogen_deficiency",
+   "pretty": "Corn: Nitrogen deficiency"
+  },
+  {
+   "id": 40,
+   "name": "Corn_(maize)___Phosphorus_deficiency",
+   "pretty": "Corn: Phosphorus deficiency"
+  },
+  {
+   "id": 41,
+   "name": "Corn_(maize)___Potassium_deficiency",
+   "pretty": "Corn: Potassium deficiency"
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+{
+ "model": "mobilenetv3_large_100",
+ "img_size": 224,
+ "epochs": 20,
+ "batch_size": 128,
+ "lr": 0.002,
+ "wd": 0.05,
+ "warmup_epochs": 1,
+ "label_smoothing": 0.1,
+ "mix_prob": 0.3,
+ "composite_p": 0.5,
+ "drop_rate": 0.2,
+ "ema_decay": 0.9998,
+ "workers": 20,
+ "out": null,
+ "seed": 0,
+ "resume": false
+}
