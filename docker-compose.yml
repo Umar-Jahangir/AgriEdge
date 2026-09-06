@@ -1,0 +1,16 @@
+# Optional development compose — NOT required for Raspberry Pi deployment
+# Use for local dev with backend only
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MOCK_MODE=true
+      - DEMO_MODE=true
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config

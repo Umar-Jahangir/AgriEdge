@@ -1,0 +1,51 @@
+# AgriEdge Rover — Application Configuration
+# Offline-first edge AI smart farming assistant
+
+app:
+  name: "AgriEdge Rover"
+  version: "0.1.0"
+  environment: development  # development | production | demo
+
+# Core modes — MOCK_MODE enables development without hardware
+modes:
+  mock_mode: true           # Generate simulated sensor/rover data
+  demo_mode: true           # Predefined zone scenarios for SIH demo
+  cloud_sync_enabled: false   # Cloud is optional, disabled by default
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true              # Dev only; disable on Raspberry Pi production
+
+database:
+  url: "sqlite:///./data/agriedge.db"
+  echo: false
+
+storage:
+  images_dir: "./data/own/images"
+  models_dir: "./models"
+
+esp32:
+  serial_port: "COM3"       # Placeholder — set per deployment (e.g. /dev/ttyUSB0)
+  baud_rate: 115200
+  reconnect_interval_sec: 5
+
+camera:
+  enabled: true
+  mock: true                # Use mock_camera when no Pi camera attached
+  capture_resolution: [1920, 1080]
+
+ai:
+  disease_model_path: "./models/disease/model.onnx"
+  pest_model_path: "./models/pest/model.onnx"
+  nutrient_model_path: "./models/nutrient/model.onnx"
+  nitrogen_model_path: "./models/nitrogen/model.onnx"
+  inference_device: "cpu"   # cpu on Raspberry Pi; cuda on dev machine for training only
+
+logging:
+  level: INFO
+  file: "./logs/agriedge.log"
+
+farm:
+  default_farm_id: "demo-farm"
+  default_farm_name: "Demo Farm"

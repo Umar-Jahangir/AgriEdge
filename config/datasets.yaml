@@ -1,0 +1,137 @@
+# AgriEdge Rover — Dataset Configuration
+# Paths are relative to repository root unless absolute.
+
+datasets:
+  plantvillage:
+    id: plantvillage
+    task: classification
+    ai_model_target: disease
+    description: Crop disease classification (controlled imagery)
+    raw_path: data/raw/plantvillage
+    processed_path: data/processed/plantvillage
+    splits_path: data/splits/plantvillage
+    source_url: https://github.com/spMohanty/PlantVillage-Dataset
+    license_note: Check repository license before redistribution
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      strategy: stratified_by_class_with_group_holdout
+      group_key: leaf_group
+      seed: 42
+    preprocessing:
+      image_size: [224, 224]
+      color_mode: rgb
+    augmentation:
+      training:
+        - horizontal_flip
+        - rotation_15
+        - brightness_contrast
+      note: Applied during training only, not during preparation
+
+  plantdoc:
+    id: plantdoc
+    task: classification
+    ai_model_target: disease
+    description: Real-world plant disease images
+    raw_path: data/raw/plantdoc
+    processed_path: data/processed/plantdoc
+    splits_path: data/splits/plantdoc
+    source_url: https://github.com/pratikkayal/PlantDoc-Dataset
+    license_note: Check repository license
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      strategy: stratified_by_class
+      seed: 42
+    preprocessing:
+      image_size: [224, 224]
+      color_mode: rgb
+
+  ip102:
+    id: ip102
+    task: detection
+    ai_model_target: pest
+    description: Insect pest recognition/detection (102 classes)
+    raw_path: data/raw/ip102
+    processed_path: data/processed/ip102
+    splits_path: data/splits/ip102
+    source_url: https://github.com/xpwu95/IP102
+    license_note: Free for academic use per dataset repository; verify before commercial use
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      strategy: use_official_split_if_present_else_stratified
+      seed: 42
+    preprocessing:
+      image_size: [640, 640]
+      annotation_formats: [coco, yolo, voc]
+
+  maize_nutrient:
+    id: maize_nutrient
+    task: classification
+    ai_model_target: nutrient
+    description: Visible maize nutrient deficiency symptoms (NOT soil NPK measurement)
+    raw_path: data/raw/maize_nutrient
+    processed_path: data/processed/maize_nutrient
+    splits_path: data/splits/maize_nutrient
+    source_url: https://doi.org/10.17632/34gb2gr7p2.1
+    license_note: Mendeley Data — review dataset terms
+    expected_classes_hint:
+      - magnesium_deficiency
+      - potassium_deficiency
+      - nitrogen_deficiency
+      - phosphorus_deficiency
+      - healthy
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      strategy: stratified_by_class
+      seed: 42
+    preprocessing:
+      image_size: [224, 224]
+      color_mode: rgb
+
+  nitrogen_maize:
+    id: nitrogen_maize
+    task: classification
+    ai_model_target: nitrogen
+    description: Visible maize nitrogen stress (NOT soil nitrogen concentration)
+    raw_path: data/raw/maize_nitrogen
+    processed_path: data/processed/nitrogen_maize
+    splits_path: data/splits/nitrogen_maize
+    source_url: https://doi.org/10.17632/g7xnn2bm4g.1
+    license_note: Mendeley Data — review dataset terms
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      strategy: stratified_by_class
+      seed: 42
+    preprocessing:
+      image_size: [224, 224]
+      color_mode: rgb
+
+  own_field:
+    id: own_field
+    task: multimodal
+    ai_model_target: domain_adaptation
+    description: AgriEdge rover field-collected images + sensor metadata (future)
+    raw_path: data/own
+    processed_path: data/processed/own_field
+    splits_path: data/splits/own_field
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      strategy: stratified_by_zone_and_label_when_available
+      seed: 42
+
+global:
+  image_extensions: [.jpg, .jpeg, .png, .bmp, .webp, .tif, .tiff]
+  manifest_format: jsonl
+  metadata_filename: dataset_metadata.json
+  corrupt_image_action: skip_and_log

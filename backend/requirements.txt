@@ -1,0 +1,23 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
+sqlalchemy>=2.0.36
+aiosqlite>=0.20.0
+pyserial>=3.5
+pyyaml>=6.0.2
+python-multipart>=0.0.18
+httpx>=0.28.0
+pillow>=11.0.0
+numpy>=2.1.0
+python-dotenv>=1.0.1
+
+# AI / ML (install on dev machine; optional subset on Pi)
+# opencv-python-headless>=4.10.0
+# onnxruntime>=1.20.0
+# torch>=2.5.0
+# ultralytics>=8.3.0
+
+# Dev / test
+pytest>=8.3.0
+pytest-asyncio>=0.24.0

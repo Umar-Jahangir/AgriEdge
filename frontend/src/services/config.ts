@@ -1,0 +1,26 @@
+// API configuration — update BASE_URL when connecting to FastAPI backend
+export const API_CONFIG = {
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  USE_MOCK: import.meta.env.VITE_USE_MOCK !== 'false',
+  ENDPOINTS: {
+    DASHBOARD: '/api/dashboard',
+    SENSORS_LATEST: '/api/sensors/latest',
+    SENSORS_HISTORY: '/api/sensors/history',
+    SOIL_ANALYSIS: '/api/soil-analysis',
+    CROP_ANALYSIS: '/api/crop-analysis',
+    RECOMMENDATIONS: '/api/recommendations',
+    ALERTS: '/api/alerts',
+    ROVER_STATUS: '/api/rover/status',
+    ROVER_START: '/api/rover/start',
+    ROVER_PAUSE: '/api/rover/pause',
+    ROVER_RESUME: '/api/rover/resume',
+    ROVER_RETURN: '/api/rover/return',
+    ROVER_EMERGENCY_STOP: '/api/rover/emergency-stop',
+    ENVIRONMENTAL_RISK: '/api/environmental-risk',
+    ANALYTICS: '/api/analytics',
+    FARM_ZONES: '/api/farm-zones',
+    FARM_MAP: '/api/farm-map',
+    AI_ANALYSIS: '/api/ai-analysis',
+    SYSTEM_STATUS: '/api/system-status',
+  },
+} as const;

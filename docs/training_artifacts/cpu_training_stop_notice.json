@@ -1,0 +1,10 @@
+﻿{
+    "last_log_tail_note":  "See preserved train_console.log; EfficientNet was mid epoch 1 (~batch 1100+/2392 when inspected)",
+    "docs_metrics":  "docs/training_artifacts/mobilenet_v3_small_cpu_phase1",
+    "process_id":  16696,
+    "reason":  "Workflow change: move ML training to GPU laptop (NVIDIA T1200). Stop CPU EfficientNet mid-run.",
+    "efficientnet_status":  "INCOMPLETE_STOPPED — no epoch finished, no checkpoints saved yet",
+    "stopped_at_local":  "2026-09-06T19:09:43.1859116+05:30",
+    "mobilenet_status":  "COMPLETE — metrics/checkpoints/onnx under runs/20260906T094019Z_mobilenet_v3_small",
+    "preserved_dir":  "models\\disease\\preserved_cpu_phase1_20260906_190942"
+}

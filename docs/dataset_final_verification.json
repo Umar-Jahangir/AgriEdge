@@ -1,0 +1,132 @@
+{
+  "plantvillage": {
+    "dataset": "plantvillage",
+    "color_exists": true,
+    "disk_images": 54305,
+    "disk_classes": 38,
+    "classes": [
+      "Apple___Apple_scab",
+      "Apple___Black_rot",
+      "Apple___Cedar_apple_rust",
+      "Apple___healthy",
+      "Blueberry___healthy",
+      "Cherry_(including_sour)___Powdery_mildew",
+      "Cherry_(including_sour)___healthy",
+      "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+      "Corn_(maize)___Common_rust_",
+      "Corn_(maize)___Northern_Leaf_Blight",
+      "Corn_(maize)___healthy",
+      "Grape___Black_rot",
+      "Grape___Esca_(Black_Measles)",
+      "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+      "Grape___healthy",
+      "Orange___Haunglongbing_(Citrus_greening)",
+      "Peach___Bacterial_spot",
+      "Peach___healthy",
+      "Pepper,_bell___Bacterial_spot",
+      "Pepper,_bell___healthy",
+      "Potato___Early_blight",
+      "Potato___Late_blight",
+      "Potato___healthy",
+      "Raspberry___healthy",
+      "Soybean___healthy",
+      "Squash___Powdery_mildew",
+      "Strawberry___Leaf_scorch",
+      "Strawberry___healthy",
+      "Tomato___Bacterial_spot",
+      "Tomato___Early_blight",
+      "Tomato___Late_blight",
+      "Tomato___Leaf_Mold",
+      "Tomato___Septoria_leaf_spot",
+      "Tomato___Spider_mites Two-spotted_spider_mite",
+      "Tomato___Target_Spot",
+      "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+      "Tomato___Tomato_mosaic_virus",
+      "Tomato___healthy"
+    ],
+    "meta_total": 54305,
+    "meta_classes": 38,
+    "split_manifest_counts": {
+      "train": 37163,
+      "validation": 7951,
+      "test": 9191
+    },
+    "meta_split_counts": {
+      "train": 37163,
+      "validation": 7951,
+      "test": 9191
+    },
+    "counts_match_meta": true,
+    "splits_match_meta": true
+  },
+  "plantdoc": {
+    "dataset": "plantdoc",
+    "disk_images": 2578,
+    "disk_classes": 28,
+    "classes": [
+      "Apple Scab Leaf",
+      "Apple leaf",
+      "Apple rust leaf",
+      "Bell_pepper leaf",
+      "Bell_pepper leaf spot",
+      "Blueberry leaf",
+      "Cherry leaf",
+      "Corn Gray leaf spot",
+      "Corn leaf blight",
+      "Corn rust leaf",
+      "Peach leaf",
+      "Potato leaf early blight",
+      "Potato leaf late blight",
+      "Raspberry leaf",
+      "Soyabean leaf",
+      "Squash Powdery mildew leaf",
+      "Strawberry leaf",
+      "Tomato Early blight leaf",
+      "Tomato Septoria leaf spot",
+      "Tomato leaf",
+      "Tomato leaf bacterial spot",
+      "Tomato leaf late blight",
+      "Tomato leaf mosaic virus",
+      "Tomato leaf yellow virus",
+      "Tomato mold leaf",
+      "Tomato two spotted spider mites leaf",
+      "grape leaf",
+      "grape leaf black rot"
+    ],
+    "meta_total": 2342,
+    "meta_classes": 28,
+    "split_manifest_counts": {
+      "train": 1625,
+      "validation": 339,
+      "test": 378
+    },
+    "meta_split_counts": {
+      "train": 1625,
+      "validation": 339,
+      "test": 378
+    },
+    "note": "Prepared/validated count may be lower than raw extract if corrupt files skipped"
+  },
+  "ip102": {
+    "dataset": "ip102",
+    "classification_images_on_disk": 75222,
+    "detection_images_on_disk": 18981,
+    "detection_xml_on_disk": 18976,
+    "classes_txt_count": 102,
+    "official_list_counts": {
+      "train.txt": 45095,
+      "val.txt": 7508,
+      "test.txt": 22619
+    },
+    "meta_total": 75222,
+    "meta_classes": 102,
+    "split_manifest_counts": {
+      "train": 45095,
+      "validation": 7508,
+      "test": 22619
+    },
+    "official_equals_manifests": true
+  },
+  "maize_nutrient_present": true,
+  "maize_nitrogen_present": false
+}

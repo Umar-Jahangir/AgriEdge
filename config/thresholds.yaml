@@ -1,0 +1,93 @@
+# AgriEdge Rover — Analysis Thresholds
+# PROTOTYPE VALUES — clearly marked, configurable per crop/soil/growth stage
+# Do NOT treat as agronomic fact without local validation
+
+meta:
+  status: "prototype"
+  note: "Thresholds are placeholders for development. Update based on crop type and agronomic guidance."
+
+units:
+  soil_moisture: "percent"
+  soil_temperature: "celsius"
+  ph: "ph"
+  ec: "ms_per_cm"
+  nitrogen: "ppm"
+  phosphorus: "ppm"
+  potassium: "ppm"
+  air_temperature: "celsius"
+  humidity: "percent"
+
+# Default crop profile — override per farm/zone
+default_crop: "maize"
+
+profiles:
+  maize:
+    soil_moisture:
+      low: 25
+      optimal_min: 30
+      optimal_max: 55
+      high: 65
+    soil_temperature:
+      low: 15
+      optimal_min: 20
+      optimal_max: 30
+      high: 35
+    ph:
+      low: 5.5
+      optimal_min: 6.0
+      optimal_max: 7.0
+      high: 7.5
+    nitrogen:
+      low: 40
+      optimal_min: 50
+      optimal_max: 80
+      high: 100
+    phosphorus:
+      low: 15
+      optimal_min: 20
+      optimal_max: 40
+      high: 50
+    potassium:
+      low: 30
+      optimal_min: 40
+      optimal_max: 70
+      high: 85
+    air_temperature:
+      stress_min: 32
+      stress_max: 38
+    humidity:
+      low: 30
+      optimal_min: 40
+      optimal_max: 75
+      high: 90
+
+risk_rules:
+  water_stress:
+    conditions:
+      - soil_moisture_below: "low"
+      - air_temperature_above: "stress_min"
+    severity: "medium"
+    recommendation: "Inspect zone and consider irrigation based on crop requirements and local agronomic guidance."
+
+  possible_nutrient_deficiency:
+    conditions:
+      - nitrogen_below: "low"
+    severity: "medium"
+    recommendation: "Possible nutrient deficiency detected. Verify soil nutrient readings before applying fertilizer."
+
+  heat_stress:
+    conditions:
+      - air_temperature_above: "stress_min"
+    severity: "low"
+    recommendation: "Elevated temperature detected. Monitor crop stress indicators and soil moisture."
+
+  disease_risk:
+    # Vision-based — triggered by AI model, not sensor thresholds alone
+    min_confidence: 0.70
+    severity: "high"
+    recommendation: "Inspect affected plants. Visual symptoms suggest possible disease."
+
+  pest_risk:
+    min_confidence: 0.70
+    severity: "high"
+    recommendation: "Pest activity detected. Inspect affected plants and consider appropriate integrated pest-management action."

@@ -1,0 +1,76 @@
+# AgriEdge Rover — Hardware Configuration
+# PLACEHOLDER VALUES — update when hardware team provides final wiring
+
+# DO NOT treat these pin assignments as final until confirmed by hardware team.
+
+raspberry_pi:
+  model: "TBD"              # e.g. Raspberry Pi 4 Model B
+  os: "Raspberry Pi OS (64-bit)"
+  storage: "microSD / SSD TBD"
+
+esp32:
+  board: "TBD"              # e.g. ESP32 DevKit
+  framework: "arduino"      # PlatformIO Arduino framework
+
+# Soil sensor pins — analog/digital interfaces TBD per sensor model
+soil_sensors:
+  moisture:
+    pin: null
+    interface: "analog"     # TBD
+    unit: "percent"
+  temperature:
+    pin: null               # DS18B20 — 1-Wire pin TBD
+    interface: "onewire"
+    unit: "celsius"
+  ph:
+    pin: null
+    interface: "analog"
+    unit: "ph"
+  ec:
+    pin: null
+    interface: "analog"
+    unit: "ms_per_cm"
+  npk:
+    pins: { nitrogen: null, phosphorus: null, potassium: null }
+    interface: "analog"
+    unit: "ppm"
+
+environment:
+  dht22:
+    pin: null
+    interface: "digital"
+    units: { temperature: "celsius", humidity: "percent" }
+
+ultrasonic:
+  front:
+    trigger_pin: null
+    echo_pin: null
+    unit: "cm"
+  left:
+    trigger_pin: null
+    echo_pin: null
+  right:
+    trigger_pin: null
+    echo_pin: null
+
+motors:
+  driver: "TBD"             # e.g. L298N, TB6612
+  pins:
+    front_left:  { in1: null, in2: null, pwm: null }
+    front_right: { in1: null, in2: null, pwm: null }
+    rear_left:   { in1: null, in2: null, pwm: null }
+    rear_right:  { in1: null, in2: null, pwm: null }
+
+power:
+  logic_battery: "TBD"      # Power bank for Pi + ESP32
+  motor_battery: "TBD"      # Separate motor battery
+  motor_voltage: null
+
+communication:
+  esp32_to_pi: "usb_serial" # USB/serial — no LoRa
+  local_wifi: true          # Optional for farmer dashboard on local network
+  internet: "optional"
+
+camera:
+  model: "TBD"              # Raspberry Pi Camera Module
+  interface: "picamera2"

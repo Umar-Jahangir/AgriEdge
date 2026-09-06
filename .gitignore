@@ -1,0 +1,158 @@
+# =============================================================================
+# AgriEdge Rover — root .gitignore
+# Track: source, scripts, configs, docs, dependency manifests, small metadata.
+# Ignore: datasets, model weights, caches, secrets, build/runtime artifacts.
+# =============================================================================
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+share/python-wheels/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env/
+.virtualenv/
+virtualenv/
+
+# ----- Node / frontend -----
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ----- Backend runtime -----
+backend/**/__pycache__/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+data/agriedge.db
+backend/*.db
+
+# ----- Environment / secrets (NEVER commit) -----
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+**/secrets/
+**/serviceAccount*.json
+**/google-credentials*.json
+
+# ----- OS / editor / IDE -----
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ----- Logs / temp -----
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# ----- PlatformIO / ESP32 build -----
+esp32/.pio/
+esp32/.vscode/
+
+# ----- Datasets (reacquire via scripts; do not commit images/archives) -----
+data/raw/
+data/external/
+data/processed/
+data/splits/
+data/own/images/
+data/own/raw/
+data/own/processed/
+# Keep dataset folder structure placeholders if present
+!data/**/.gitkeep
+!data/**/README.md
+
+# ----- Model weights & large training outputs -----
+# Keep directory layout + READMEs; ignore binaries and run folders.
+models/**/*.pt
+models/**/*.pth
+models/**/*.ckpt
+models/**/*.onnx
+models/**/*.tflite
+models/**/*.h5
+models/**/*.pkl
+models/**/*.joblib
+models/**/*.bin
+models/**/*.safetensors
+models/**/checkpoints/
+models/**/runs/
+models/**/preserved_*/
+models/**/*.log
+models/disease/train_console.log
+
+# Explicitly keep small tracked placeholders / docs under models/
+!models/**/.gitkeep
+!models/**/README.md
+
+# ----- Caches -----
+.cache/
+**/__pycache__/
+.torch/
+*.cache
+
+# ----- Local overrides (machine-specific) -----
+config/local*.yaml
+config/local*.yml
+*.local.yaml
+*.local.yml
+frontend/.env.local
+
+# ----- Antigravity / Cursor / agent local (if any) -----
+.cursor/
+.antigravity/
+agent-transcripts/
+
+# ----- pytest / coverage already above; Jupyter -----
+*.nbconvert.ipynb
