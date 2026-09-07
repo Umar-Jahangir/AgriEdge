@@ -71,11 +71,11 @@ void left() {
 
   Serial.println("LEFT");
 
-  // LEFT side backward
+  // LEFT side → BACKWARD
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
 
-  // RIGHT side forward
+  // RIGHT side → FORWARD
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
 
@@ -88,11 +88,11 @@ void right() {
 
   Serial.println("RIGHT");
 
-  // LEFT side forward
+  // LEFT side → FORWARD
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
 
-  // RIGHT side backward
+  // RIGHT side → BACKWARD
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
 
