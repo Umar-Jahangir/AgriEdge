@@ -13,22 +13,25 @@ import {
   Settings,
   X,
   Sprout,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useSystemStatus } from '../../hooks/useData';
+import { useLanguage } from '../../context/LanguageContext';
+import type { Translations } from '../../i18n/translations';
 
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/farm-map', label: 'Farm Map', icon: Map },
-  { to: '/soil-health', label: 'Soil Health', icon: Droplets },
-  { to: '/crop-health', label: 'Crop Health', icon: Leaf },
-  { to: '/ai-analysis', label: 'AI Analysis', icon: Brain },
-  { to: '/recommendations', label: 'Recommendations', icon: Lightbulb },
-  { to: '/environmental-risk', label: 'Environmental Risk', icon: CloudSun },
-  { to: '/rover', label: 'Rover', icon: Bot },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/alerts', label: 'Alerts', icon: Bell },
-  { to: '/settings', label: 'Settings', icon: Settings },
+const navItems: { to: string; labelKey: keyof Translations; icon: LucideIcon }[] = [
+  { to: '/dashboard', labelKey: 'dashboard', icon: LayoutDashboard },
+  { to: '/farm-map', labelKey: 'farmMap', icon: Map },
+  { to: '/soil-health', labelKey: 'soilHealth', icon: Droplets },
+  { to: '/crop-health', labelKey: 'cropHealth', icon: Leaf },
+  { to: '/ai-analysis', labelKey: 'aiAnalysis', icon: Brain },
+  { to: '/recommendations', labelKey: 'recommendations', icon: Lightbulb },
+  { to: '/environmental-risk', labelKey: 'environmentalRisk', icon: CloudSun },
+  { to: '/rover', labelKey: 'rover', icon: Bot },
+  { to: '/analytics', labelKey: 'analytics', icon: BarChart3 },
+  { to: '/alerts', labelKey: 'alerts', icon: Bell },
+  { to: '/settings', labelKey: 'settings', icon: Settings },
 ];
 
 interface SidebarProps {
@@ -38,6 +41,7 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const { data: systemStatus } = useSystemStatus();
+  const { t } = useLanguage();
 
   return (
     <>
@@ -89,7 +93,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                   }
                 >
                   <item.icon className="h-4 w-4 shrink-0 opacity-80" />
-                  <span className="font-display tracking-tight text-[13px]">{item.label}</span>
+                  <span className="font-display tracking-tight text-[13px]">{t(item.labelKey)}</span>
                 </NavLink>
               </li>
             ))}

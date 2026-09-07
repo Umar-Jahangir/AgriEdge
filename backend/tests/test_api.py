@@ -38,3 +38,12 @@ def test_rover_command():
   r = client.post("/api/rover/command", json={"command": "pause"})
   assert r.status_code == 200
   assert r.json()["state"] == "PAUSED"
+
+
+def test_tts_endpoint_fallback():
+  r = client.post("/api/tts/speak", json={"text": "पानी की कमी", "language": "hi"})
+  assert r.status_code == 200
+  # Without an API key configured, it returns fallback flag gracefully
+  data = r.json()
+  assert "fallback" in data or r.headers.get("content-type") == "audio/mpeg"
+

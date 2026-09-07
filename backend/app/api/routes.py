@@ -3,7 +3,8 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.camera.interface import get_camera
@@ -534,3 +535,27 @@ def farm_map_compat():
       {"x": 30, "y": 72, "zone_id": "ZONE_C"},
     ],
   }
+
+
+class TTSRequest(BaseModel):
+  text: str
+  language: str = "hi"
+  voice_id: str | None = None
+  api_key: str | None = None
+
+
+@router.post("/tts/speak")
+async def generate_tts_speech(req: TTSRequest):
+  """Generate speech audio via ElevenLabs Multilingual V2 API."""
+  from app.services.tts import ElevenLabsTTSService
+  svc = ElevenLabsTTSService(api_key=req.api_key)
+  audio = await svc.generate_speech(
+    text=req.text,
+    voice_id=req.voice_id,
+    language=req.language,
+    api_key_override=req.api_key,
+  )
+  if audio:
+    return Response(content=audio, media_type="audio/mpeg")
+  return {"fallback": True, "message": "ElevenLabs audio not available. Falling back to local TTS."}
+

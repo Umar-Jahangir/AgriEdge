@@ -1,4 +1,5 @@
 import type { FarmMapData } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 import { cn } from '../../utils/cn';
 
 interface FarmMapProps {
@@ -9,16 +10,17 @@ interface FarmMapProps {
 
 export function FarmMap({ data, className, compact }: FarmMapProps) {
   const { samplingPoints, rover, attentionAreas } = data;
+  const { t } = useLanguage();
 
   return (
     <div className={cn('tactile-card p-5 bg-white', className)}>
       <div className="flex items-center justify-between border-b border-earth-200 pb-3 mb-4">
         <div>
           <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
-            // FIELD COORDINATE GRID
+            // {t('coordinateGridTitle')}
           </span>
           <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
-            Autonomous Rover Sampling Array
+            {t('samplingArrayTitle')}
           </h3>
         </div>
         <div className="flex items-center gap-2">
@@ -52,23 +54,23 @@ export function FarmMap({ data, className, compact }: FarmMapProps) {
           {/* Sector Crosshair Dividers */}
           <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
             <div className="border-r-2 border-b-2 border-dashed border-earth-300/80 relative">
-              <span className="absolute left-2.5 top-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
-                [SECTOR A // NW]
+              <span className="absolute left-2.5 top-2 font-mono text-[10px] font-bold tracking-wider text-earth-700 bg-earth-100/70 px-1">
+                [{t('sectorNW')}]
               </span>
             </div>
             <div className="border-b-2 border-dashed border-earth-300/80 relative">
-              <span className="absolute right-2.5 top-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
-                [SECTOR B // NE]
+              <span className="absolute right-2.5 top-2 font-mono text-[10px] font-bold tracking-wider text-earth-700 bg-earth-100/70 px-1">
+                [{t('sectorNE')}]
               </span>
             </div>
             <div className="border-r-2 border-dashed border-earth-300/80 relative">
-              <span className="absolute left-2.5 bottom-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
-                [SECTOR C // SW]
+              <span className="absolute left-2.5 bottom-2 font-mono text-[10px] font-bold tracking-wider text-earth-700 bg-earth-100/70 px-1">
+                [{t('sectorSW')}]
               </span>
             </div>
             <div className="relative">
-              <span className="absolute right-2.5 bottom-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
-                [SECTOR D // SE]
+              <span className="absolute right-2.5 bottom-2 font-mono text-[10px] font-bold tracking-wider text-earth-700 bg-earth-100/70 px-1">
+                [{t('sectorSE')}]
               </span>
             </div>
           </div>
@@ -155,23 +157,23 @@ export function FarmMap({ data, className, compact }: FarmMapProps) {
           <div className="flex flex-wrap gap-4">
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 border border-farm-700 bg-farm-600" />
-              <span className="font-medium">COMPLETED</span>
+              <span className="font-medium">{t('legendCompleted')}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 border border-farm-900 bg-farm-800" />
-              <span className="font-medium">CURRENT</span>
+              <span className="font-medium">{t('legendCurrent')}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 border border-earth-400 bg-white" />
-              <span className="font-medium">PENDING</span>
+              <span className="font-medium">{t('legendPending')}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 border border-amber-700 bg-amber-500" />
-              <span className="font-medium">ATTENTION</span>
+              <span className="font-medium">{t('legendAttention')}</span>
             </span>
           </div>
           <div className="flex items-center gap-2 text-earth-500">
-            <span>COORDINATES: LAT 18.5204° N, LONG 73.8567° E</span>
+            <span>{t('coordinatesStamp')}</span>
           </div>
         </div>
       </div>

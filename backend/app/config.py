@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     esp32_serial_port: str = "COM3"
     esp32_baud_rate: int = 115200
 
+    elevenlabs_api_key: str = ""
+
     log_level: str = "INFO"
 
 

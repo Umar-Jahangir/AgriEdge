@@ -60,7 +60,7 @@ export interface CropAnalysis {
 
 export interface Recommendation {
   id: string;
-  category: 'IRRIGATION' | 'NUTRIENTS' | 'HEAT_STRESS' | 'DISEASE' | 'GENERAL';
+  category: 'IRRIGATION' | 'NUTRIENTS' | 'HEAT_STRESS' | 'DISEASE' | 'PEST' | 'GENERAL';
   issue: string;
   severity: Severity;
   reason: string;
