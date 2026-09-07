@@ -27,6 +27,11 @@ export function ZoneCard({ zone, selected, onClick }: ZoneCardProps) {
           <h4 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
             {zone.name}
           </h4>
+          {zone.growthStage && (
+            <span className="mt-1 inline-block text-[10px] font-semibold text-farm-800 bg-farm-50 px-1.5 py-0.5 rounded border border-farm-200">
+              {zone.growthStage} • Day {zone.stageDay ?? 34}
+            </span>
+          )}
         </div>
         <RiskBadge risk={zone.riskLevel} />
       </div>

@@ -104,6 +104,13 @@ export interface FarmZone {
   riskLevel: RiskLevel;
   samplingCoverage: number;
   position: { row: number; col: number };
+  cropType?: string;
+  growthStage?: string;
+  growthStageHi?: string;
+  growthStageMr?: string;
+  stageDay?: number;
+  gddAccumulated?: number;
+  yieldRiskPct?: number;
 }
 
 export interface CurrentWeather {
@@ -296,4 +303,43 @@ export interface IrrigationSchedule {
   irrigationMethod: string;
   timestamp: string;
   relayState: RelayState;
+}
+
+export interface ZoneYieldRisk {
+  zoneId: string;
+  zoneName: string;
+  cropType: string;
+  growthStage: string;
+  growthStageHi?: string;
+  growthStageMr?: string;
+  stageDay: number;
+  gddAccumulated: number;
+  yieldRiskLevel: RiskLevel;
+  yieldRiskPct: number;
+  expectedYieldQuintalsPerAcre: number;
+  potentialYieldQuintalsPerAcre: number;
+  yieldSavedQuintalsPerAcre: number;
+  waterPenaltyPct: number;
+  nutrientPenaltyPct: number;
+  diseasePenaltyPct: number;
+  criticalSensitivity: boolean;
+}
+
+export interface YieldRiskForecast {
+  overallYieldRisk: RiskLevel;
+  projectedYieldRiskPct: number;
+  yieldSavedQuintalsPerAcre: number;
+  pesticideSavingsInrPerHa: number;
+  revenuePreservedInrPerAcre: number;
+  potentialYieldQuintalsPerAcre: number;
+  cropType: string;
+  blanketSprayCostInrPerHa: number;
+  targetedSprayCostInrPerHa: number;
+  zones: ZoneYieldRisk[];
+  decisionInsights: {
+    en: string;
+    hi: string;
+    mr: string;
+  };
+  timestamp: string;
 }

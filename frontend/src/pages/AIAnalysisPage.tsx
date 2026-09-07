@@ -3,6 +3,7 @@ import { RiskBadge } from '../components/ui/StatusBadge';
 import { KPICard } from '../components/ui/KPICard';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
+import { YieldProtectionCard } from '../components/yield/YieldProtectionCard';
 import { useAIAnalysis } from '../hooks/useData';
 import { Brain, Droplets, Bug, Sprout, TrendingDown } from 'lucide-react';
 
@@ -102,6 +103,9 @@ export function AIAnalysisPage() {
           </div>
         </div>
       </div>
+
+      {/* Yield-Risk Forecasting, Phenology & Economics */}
+      <YieldProtectionCard />
     </div>
   );
 }

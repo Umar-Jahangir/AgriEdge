@@ -10,6 +10,7 @@ import { ErrorState } from '../components/ui/ErrorState';
 import { FarmMap } from '../components/farm/FarmMap';
 import { RecommendationCard } from '../components/recommendations/RecommendationCard';
 import { SmartIrrigationCard } from '../components/irrigation/SmartIrrigationCard';
+import { YieldProtectionCard } from '../components/yield/YieldProtectionCard';
 import { useDashboard, useFarmMap, useRecommendations } from '../hooks/useData';
 import { useLanguage } from '../context/LanguageContext';
 import { healthStatusColor } from '../utils/format';
@@ -223,6 +224,9 @@ export function DashboardPage() {
 
       {/* Smart Precision Irrigation & Solenoid Control */}
       <SmartIrrigationCard />
+
+      {/* Yield-Risk Forecasting & Crop Phenology */}
+      <YieldProtectionCard />
 
       {/* Field Map + Priority Advisories */}
       <div className="grid gap-6 lg:grid-cols-5">

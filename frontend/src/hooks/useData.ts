@@ -81,3 +81,7 @@ export function useAlerts(filter: 'all' | 'critical' | 'high' | 'medium' | 'low'
 export function useIrrigationSchedule(lat?: number, lon?: number) {
   return useAsyncData(() => api.getIrrigationSchedule(lat, lon), [lat, lon]);
 }
+
+export function useYieldRisk() {
+  return useAsyncData(() => api.getYieldRisk());
+}

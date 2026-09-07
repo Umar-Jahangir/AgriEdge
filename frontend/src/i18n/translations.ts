@@ -169,6 +169,26 @@ export interface Translations {
   hydratedTitle: string;
   methodDrip: string;
   minutesUnit: string;
+
+  // Yield Risk & Phenology
+  yieldProtectionTitle: string;
+  yieldProtectionSubtitle: string;
+  projectedYieldRisk: string;
+  yieldSavedLabel: string;
+  quintalsPerAcre: string;
+  pesticideSavingsLabel: string;
+  rupeesPerHectare: string;
+  revenuePreservedLabel: string;
+  rupeesPerAcre: string;
+  growthStageTimelineTitle: string;
+  dayLabel: string;
+  stageVegetative: string;
+  stageFlowering: string;
+  stageFruitFormation: string;
+  stageRipening: string;
+  stageSeedling: string;
+  spotSprayingSavingsBadge: string;
+  earlyInterventionBadge: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -328,6 +348,25 @@ export const translations: Record<Language, Translations> = {
     hydratedTitle: 'Optimal Soil Hydration',
     methodDrip: 'Precision Root Drip',
     minutesUnit: 'min',
+
+    yieldProtectionTitle: 'Yield-Risk Forecasting & Crop Phenology',
+    yieldProtectionSubtitle: 'FAO-66 yield response & Growing Degree Days (GDD) growth stage tracking',
+    projectedYieldRisk: 'Projected Yield Risk',
+    yieldSavedLabel: 'Crop Yield Preserved',
+    quintalsPerAcre: 'Quintals / Acre',
+    pesticideSavingsLabel: 'Pesticide Cost Reduction',
+    rupeesPerHectare: '₹ / Hectare',
+    revenuePreservedLabel: 'Market Revenue Preserved',
+    rupeesPerAcre: '₹ / Acre',
+    growthStageTimelineTitle: 'Zone Crop Growth Stage Timeline',
+    dayLabel: 'Day',
+    stageVegetative: 'Vegetative Stage',
+    stageFlowering: 'Flowering & Anthesis',
+    stageFruitFormation: 'Fruit Formation',
+    stageRipening: 'Ripening & Harvest',
+    stageSeedling: 'Seedling / Emergence',
+    spotSprayingSavingsBadge: 'Targeted Spot-Spraying',
+    earlyInterventionBadge: 'Early In-Situ Diagnosis',
   },
 
   hi: {
@@ -486,6 +525,25 @@ export const translations: Record<Language, Translations> = {
     hydratedTitle: 'अनुकूल मृदा नमी स्तर',
     methodDrip: 'सटीक ड्रिप प्रणाली',
     minutesUnit: 'मिनट',
+
+    yieldProtectionTitle: 'पैदावार जोखिम पूर्वानुमान एवं फसल विकास चरण',
+    yieldProtectionSubtitle: 'FAO-66 तनाव प्रतिक्रिया एवं डिग्री-डे (GDD) आधारित विकास निगरानी',
+    projectedYieldRisk: 'अनुमानित पैदावार जोखिम',
+    yieldSavedLabel: 'सुरक्षित पैदावार (बचत)',
+    quintalsPerAcre: 'क्विंटल / एकड़',
+    pesticideSavingsLabel: 'कीटनाशक खर्च में बचत',
+    rupeesPerHectare: '₹ / हेक्टेयर',
+    revenuePreservedLabel: 'सुरक्षित बाजार मूल्य (आय)',
+    rupeesPerAcre: '₹ / एकड़',
+    growthStageTimelineTitle: 'जोन अनुसार फसल विकास अवस्था',
+    dayLabel: 'दिन',
+    stageVegetative: 'वानस्पतिक बढ़वार',
+    stageFlowering: 'फूल आने की अवस्था',
+    stageFruitFormation: 'फल विकास अवस्था',
+    stageRipening: 'परिपक्वता एवं तुड़ाई',
+    stageSeedling: 'अंकुरण / पौधा अवस्था',
+    spotSprayingSavingsBadge: 'सटीक लक्षित छिड़काव',
+    earlyInterventionBadge: 'समय पर रोग निदान',
   },
 
   mr: {
@@ -644,6 +702,25 @@ export const translations: Record<Language, Translations> = {
     hydratedTitle: 'मातीत योग्य ओलावा',
     methodDrip: 'अचूक ठिबक पद्धत',
     minutesUnit: 'मिनिटे',
+
+    yieldProtectionTitle: 'उत्पादन जोखीम अंदाज व पीक वाढीचे टप्पे',
+    yieldProtectionSubtitle: 'FAO-66 ताण प्रतिसाद व डिग्री-डे (GDD) आधारित पीक वाढ निरीक्षण',
+    projectedYieldRisk: 'अंदाजित उत्पादन जोखीम',
+    yieldSavedLabel: 'वाचवलेले पीक उत्पादन',
+    quintalsPerAcre: 'क्विंटल / एकर',
+    pesticideSavingsLabel: 'कीटकनाशक खर्चातील बचत',
+    rupeesPerHectare: '₹ / हेक्टर',
+    revenuePreservedLabel: 'संरक्षित बाजार मूल्य (नफा)',
+    rupeesPerAcre: '₹ / एकर',
+    growthStageTimelineTitle: 'झोननुसार पीक वाढीचा टप्पा',
+    dayLabel: 'दिवस',
+    stageVegetative: 'शाकीय वाढ',
+    stageFlowering: 'फुलोरा अवस्था',
+    stageFruitFormation: 'फळ धारणा',
+    stageRipening: 'पक्वता व काढणी',
+    stageSeedling: 'रोपांची अवस्था',
+    spotSprayingSavingsBadge: 'सटीक ठराविक फवारणी',
+    earlyInterventionBadge: 'वेळेवर रोग निदान',
   },
 };
 

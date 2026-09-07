@@ -30,12 +30,14 @@ from app.schemas.api import (
   SensorTelemetry,
   SystemStatusResponse,
   VisionPrediction,
+  YieldRiskResponse,
   ZoneDetail,
   ZoneSummary,
 )
 from app.services.demo_data import get_all_demo_zones, get_demo_zone
 from app.services.inference import inference_service
 from app.services.weather import live_weather_service
+from app.services.yield_risk import yield_risk_service
 from app.sensors.validator import SensorValidator
 
 router = APIRouter()
@@ -81,6 +83,13 @@ def get_farm():
       ph=z["ph"], nitrogen=z["nitrogen"], phosphorus=z["phosphorus"],
       potassium=z["potassium"], crop_health=z["crop_health"],
       risk_level=z["risk_level"], sampling_coverage=z["sampling_coverage"],
+      crop_type=z.get("crop_type", "Tomato (Abhinav F1)"),
+      growth_stage=z.get("growth_stage", "Vegetative Stage"),
+      growth_stage_hi=z.get("growth_stage_hi"),
+      growth_stage_mr=z.get("growth_stage_mr"),
+      stage_day=z.get("stage_day", 34),
+      gdd_accumulated=z.get("gdd_accumulated", 500),
+      yield_risk_pct=z.get("yield_risk_pct", 10.0),
     )
     for z in get_all_demo_zones()
   ]
@@ -103,6 +112,13 @@ def get_zone(zone_id: str):
     ph=z["ph"], nitrogen=z["nitrogen"], phosphorus=z["phosphorus"],
     potassium=z["potassium"], crop_health=z["crop_health"],
     risk_level=z["risk_level"], sampling_coverage=z["sampling_coverage"],
+    crop_type=z.get("crop_type", "Tomato (Abhinav F1)"),
+    growth_stage=z.get("growth_stage", "Vegetative Stage"),
+    growth_stage_hi=z.get("growth_stage_hi"),
+    growth_stage_mr=z.get("growth_stage_mr"),
+    stage_day=z.get("stage_day", 34),
+    gdd_accumulated=z.get("gdd_accumulated", 500),
+    yield_risk_pct=z.get("yield_risk_pct", 10.0),
     air_temperature=z["air_temperature"], humidity=z["humidity"],
     latest_ai_detection=z["ai_detection"], ai_confidence=z["ai_confidence"],
     recommendation=z["recommendation"],
@@ -369,6 +385,13 @@ def control_irrigation_valve(req: ValveControlRequest):
     "relay_state": _irrigation_relay_state,
     "message": f"Irrigation pump relay set to {state} ({mode} mode)",
   }
+
+
+@router.get("/yield-risk", response_model=YieldRiskResponse)
+def yield_risk_forecast():
+  """Computes crop phenology growth stages, yield risk penalties, and farm economics (PS §1 & §7)."""
+  zones = get_all_demo_zones()
+  return yield_risk_service.calculate_farm_forecast(zones)
 
 
 @router.get("/analytics")
