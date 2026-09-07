@@ -1,7 +1,8 @@
-// API configuration — update BASE_URL when connecting to FastAPI backend
+// API configuration — uses relative path so Vite proxy forwards /api and /images to FastAPI on port 8000.
+// This works identically on both laptop and smartphones with zero port 8000 / firewall blocks!
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  USE_MOCK: import.meta.env.VITE_USE_MOCK !== 'false',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || '',
+  USE_MOCK: import.meta.env.VITE_USE_MOCK === 'true',
   ENDPOINTS: {
     DASHBOARD: '/api/dashboard',
     SENSORS_LATEST: '/api/sensors/latest',

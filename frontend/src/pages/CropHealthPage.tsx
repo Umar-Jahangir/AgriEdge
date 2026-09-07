@@ -209,28 +209,51 @@ export function CropHealthPage() {
               </div>
             )}
 
-            <label
-              className={cn(
-                'mt-4 inline-flex w-full items-center justify-center gap-2 border-2 border-earth-900 bg-earth-900 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-farm-900 active:translate-y-0.5 cursor-pointer',
-                isAnalyzing && 'pointer-events-none opacity-50'
-              )}
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ANALYZING TENSOR...
-                </>
-              ) : (
-                'SELECT LEAF IMAGE'
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                disabled={isAnalyzing}
-                onChange={handleUpload}
-              />
-            </label>
+            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+              <label
+                className={cn(
+                  'flex-1 inline-flex items-center justify-center gap-2 border-2 border-farm-900 bg-farm-800 px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-farm-900 active:translate-y-0.5 cursor-pointer shadow-xs',
+                  isAnalyzing && 'pointer-events-none opacity-50'
+                )}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ANALYZING TENSOR...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="h-4 w-4 text-farm-200" />
+                    SNAP CAMERA
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  disabled={isAnalyzing}
+                  onChange={handleUpload}
+                />
+              </label>
+
+              <label
+                className={cn(
+                  'flex-1 inline-flex items-center justify-center gap-2 border-2 border-earth-800 bg-white px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-earth-900 transition-all hover:bg-earth-100 active:translate-y-0.5 cursor-pointer',
+                  isAnalyzing && 'pointer-events-none opacity-50'
+                )}
+              >
+                <Upload className="h-4 w-4 text-earth-700" />
+                GALLERY / FILE
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={isAnalyzing}
+                  onChange={handleUpload}
+                />
+              </label>
+            </div>
           </div>
 
           {/* Historical Scans Ledger */}

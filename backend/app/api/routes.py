@@ -281,6 +281,8 @@ async def live_weather(lat: float | None = None, lon: float | None = None):
     flood=flood,
     soil_moisture=zone.get("soil_moisture", 28.0),
     soil_temp=zone.get("soil_temperature", 24.0),
+    lat=lat,
+    lon=lon,
   )
   return predictions
 
@@ -296,6 +298,8 @@ async def environmental_risk(lat: float | None = None, lon: float | None = None)
     flood=flood,
     soil_moisture=zone.get("soil_moisture", 28.0),
     soil_temp=zone.get("soil_temperature", 24.0),
+    lat=lat,
+    lon=lon,
   )
   current = predictions.get("current_weather", {})
   preds = predictions.get("predictions", {})
@@ -311,6 +315,7 @@ async def environmental_risk(lat: float | None = None, lon: float | None = None)
     "soil_temperature": zone["soil_temperature"],
     "soil_moisture": zone["soil_moisture"],
     "weather_integration_pending": False,
+    "location": predictions.get("location", {"latitude": 18.5204, "longitude": 73.8567}),
     "current_weather": current,
     "predictions": preds,
     "daily_forecast": predictions.get("daily_forecast", []),

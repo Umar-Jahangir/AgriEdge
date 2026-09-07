@@ -43,26 +43,22 @@ class LiveWeatherService:
 
   def __init__(self):
     self.cache_ttl = timedelta(minutes=15)
-    self._cached_weather: dict[str, Any] | None = None
-    self._cached_flood: dict[str, Any] | None = None
-    self._last_weather_fetch: datetime | None = None
-    self._last_flood_fetch: datetime | None = None
-    # Default coordinates: Pune / Maharashtra, India (Agricultural Hub)
+    self._weather_cache: dict[tuple[float, float], tuple[datetime, dict[str, Any]]] = {}
+    self._flood_cache: dict[tuple[float, float], tuple[datetime, dict[str, Any]]] = {}
+    # Default coordinates: Pune / Western Maharashtra, India (Agricultural Basin)
     self.default_lat = 18.5204
     self.default_lon = 73.8567
 
   async def get_live_weather(self, lat: float | None = None, lon: float | None = None) -> dict[str, Any]:
     """Fetches real-time weather and 7-day forecast from Open-Meteo."""
-    latitude = lat or self.default_lat
-    longitude = lon or self.default_lon
+    latitude = round(lat if lat is not None else self.default_lat, 4)
+    longitude = round(lon if lon is not None else self.default_lon, 4)
+    coord_key = (latitude, longitude)
 
     now = datetime.utcnow()
-    if (
-      self._cached_weather
-      and self._last_weather_fetch
-      and (now - self._last_weather_fetch) < self.cache_ttl
-    ):
-      return self._cached_weather
+    cached = self._weather_cache.get(coord_key)
+    if cached and (now - cached[0]) < self.cache_ttl:
+      return cached[1]
 
     url = (
       "https://api.open-meteo.com/v1/forecast?"
@@ -78,8 +74,7 @@ class LiveWeatherService:
         resp = await client.get(url)
         if resp.status_code == 200:
           data = resp.json()
-          self._cached_weather = data
-          self._last_weather_fetch = now
+          self._weather_cache[coord_key] = (now, data)
           return data
         else:
           logger.warning(f"Open-Meteo weather API returned {resp.status_code}")
@@ -90,16 +85,14 @@ class LiveWeatherService:
 
   async def get_flood_forecast(self, lat: float | None = None, lon: float | None = None) -> dict[str, Any]:
     """Fetches 7-day GloFAS river discharge forecast from Open-Meteo Flood API."""
-    latitude = lat or self.default_lat
-    longitude = lon or self.default_lon
+    latitude = round(lat if lat is not None else self.default_lat, 4)
+    longitude = round(lon if lon is not None else self.default_lon, 4)
+    coord_key = (latitude, longitude)
 
     now = datetime.utcnow()
-    if (
-      self._cached_flood
-      and self._last_flood_fetch
-      and (now - self._last_flood_fetch) < self.cache_ttl
-    ):
-      return self._cached_flood
+    cached = self._flood_cache.get(coord_key)
+    if cached and (now - cached[0]) < self.cache_ttl:
+      return cached[1]
 
     url = (
       "https://flood-api.open-meteo.com/v1/flood?"
@@ -113,8 +106,7 @@ class LiveWeatherService:
         resp = await client.get(url)
         if resp.status_code == 200:
           data = resp.json()
-          self._cached_flood = data
-          self._last_flood_fetch = now
+          self._flood_cache[coord_key] = (now, data)
           return data
         else:
           logger.warning(f"Open-Meteo Flood API returned {resp.status_code}")
@@ -129,6 +121,8 @@ class LiveWeatherService:
     flood: dict[str, Any],
     soil_moisture: float = 28.0,
     soil_temp: float = 24.0,
+    lat: float | None = None,
+    lon: float | None = None,
   ) -> dict[str, Any]:
     """Applies open-source agro-meteorological models to predict:
     1. River & Flash Flood / Runoff Risk (GloFAS + Soil Saturation Model)
@@ -146,7 +140,7 @@ class LiveWeatherService:
     wind_now = current.get("wind_speed_10m", 8.0)
     wmo_code = current.get("weather_code", 1)
 
-    # 1. FLOOD & WATERLOGGING MODEL (GloFAS + 48h Rain + Soil Saturation)
+    # 1. FLOOD & WATERLOGGING MODEL (GloFAS + 48h Rain + Soil Infiltration Saturation)
     daily_precip = daily.get("precipitation_sum", [0.0] * 7)
     rain_48h = sum(daily_precip[:2]) if len(daily_precip) >= 2 else 0.0
     rain_7d = sum(daily_precip)
@@ -155,19 +149,39 @@ class LiveWeatherService:
     peak_discharge = max(discharges) if discharges else 30.0
     mean_discharge = sum(discharges) / len(discharges) if discharges else 25.0
 
-    # Hydrological saturation factor: high in-situ soil moisture prevents absorption
-    soil_saturation = min(1.0, soil_moisture / 100.0)
-    runoff_factor = (soil_saturation * rain_48h) / 50.0  # normalized to 50mm capacity
-    
-    # Discharge anomaly score (baseline ~30 m³/s for local river basin)
-    discharge_anomaly = max(0.0, (peak_discharge - 30.0) / 70.0)
+    # Hydrological soil saturation factor:
+    # 15% is permanent wilting point, 45-50% is field capacity / saturation
+    soil_sat_ratio = max(0.0, min(1.0, (soil_moisture - 15.0) / 35.0))
+    # Available retention capacity before runoff starts (mm):
+    # When soil is dry (24%), capacity is ~37mm, absorbing mild rain with 0 waterlogging
+    soil_absorption_capacity_mm = max(5.0, (1.0 - soil_sat_ratio) * 50.0)
+    excess_rain_mm = max(0.0, rain_48h - soil_absorption_capacity_mm)
 
-    flood_score = min(100, int(round((runoff_factor * 60.0 + discharge_anomaly * 40.0) * 100)))
-    if flood_score >= 75 or rain_48h >= 65:
+    if excess_rain_mm <= 0:
+      waterlogging_score = min(20.0, (rain_48h / 35.0) * 15.0)
+    else:
+      waterlogging_score = min(100.0, 20.0 + (excess_rain_mm / 40.0) * 80.0)
+
+    # GloFAS Regional River Discharge calibration:
+    # Peninsular / Indian river baseline during monsoon is ~30-120 m³/s (normal baseflow)
+    # Flood warning stage: > 250-350 m³/s; Severe inundation / dam breach: > 700 m³/s
+    if peak_discharge <= 120.0:
+      river_score = (peak_discharge / 120.0) * 12.0
+    elif peak_discharge <= 300.0:
+      river_score = 12.0 + ((peak_discharge - 120.0) / 180.0) * 28.0
+    elif peak_discharge <= 700.0:
+      river_score = 40.0 + ((peak_discharge - 300.0) / 400.0) * 35.0
+    else:
+      river_score = min(100.0, 75.0 + ((peak_discharge - 700.0) / 700.0) * 25.0)
+
+    flood_score = int(round(max(waterlogging_score, river_score * 0.6 + waterlogging_score * 0.4)))
+    flood_score = min(100, max(5, flood_score))
+
+    if flood_score >= 75 or (rain_48h >= 75.0 and soil_moisture >= 42.0) or peak_discharge >= 700.0:
       flood_severity = "CRITICAL"
-    elif flood_score >= 50 or rain_48h >= 35:
+    elif flood_score >= 50 or (rain_48h >= 50.0 and soil_moisture >= 38.0) or peak_discharge >= 350.0:
       flood_severity = "HIGH"
-    elif flood_score >= 25 or rain_48h >= 15:
+    elif flood_score >= 25 or rain_48h >= 25.0:
       flood_severity = "MEDIUM"
     else:
       flood_severity = "LOW"
@@ -183,17 +197,25 @@ class LiveWeatherService:
     daily_depletion_rate = max(1.5, (total_et0 / 7.0) * 0.8)
     days_water_reserve = round(available_water / daily_depletion_rate, 1)
 
-    if water_balance < -25 and soil_moisture < 25:
-      drought_score = min(100, int(round(80 + abs(water_balance))))
-      drought_severity = "CRITICAL" if days_water_reserve <= 2 else "HIGH"
-    elif water_balance < -15 or soil_moisture < 30:
-      drought_score = min(75, int(round(50 + abs(water_balance))))
+    spei_deficit = max(0.0, -water_balance)
+
+    # In agricultural hydrology:
+    # True Agricultural Drought requires prolonged severe rainfall deficit (P - ET0 < -25mm)
+    # AND dry root-zone soil (<20%).
+    # If 7-day rainfall is active (>15mm) or net water balance is mild (P - ET0 > -15mm),
+    # there is NO regional drought (drought risk is LOW).
+    if water_balance <= -35.0 and rain_7d < 5.0 and soil_moisture < 20.0:
+      drought_score = min(100, int(round(75 + spei_deficit * 0.5)))
+      drought_severity = "CRITICAL" if days_water_reserve <= 2.0 else "HIGH"
+    elif water_balance <= -25.0 and rain_7d < 10.0 and soil_moisture < 25.0:
+      drought_score = min(75, int(round(50 + spei_deficit * 0.6)))
+      drought_severity = "HIGH"
+    elif water_balance <= -15.0 and rain_7d < 15.0 and soil_moisture < 28.0:
+      drought_score = min(45, int(round(25 + spei_deficit * 0.7)))
       drought_severity = "MEDIUM"
-    elif water_balance >= 0 or soil_moisture >= 45:
-      drought_score = 15
-      drought_severity = "LOW"
     else:
-      drought_score = 35
+      # Balanced or mild deficit with ongoing monsoon showers (e.g. Nashik, Assam, Nepal)
+      drought_score = max(5, min(20, int(round(spei_deficit * 0.8))))
       drought_severity = "LOW"
 
     # 3. IMD HEAT WAVE & HEAT STRESS MODEL
@@ -250,7 +272,14 @@ class LiveWeatherService:
       soil_moisture=soil_moisture,
     )
 
+    target_lat = round(lat if lat is not None else weather.get("latitude", self.default_lat), 4)
+    target_lon = round(lon if lon is not None else weather.get("longitude", self.default_lon), 4)
+
     return {
+      "location": {
+        "latitude": target_lat,
+        "longitude": target_lon,
+      },
       "current_weather": {
         "temperature": round(temp_now, 1),
         "apparent_temperature": round(heat_index, 1),
@@ -270,7 +299,7 @@ class LiveWeatherService:
           "rain_48h_forecast_mm": round(rain_48h, 1),
           "peak_river_discharge_m3s": round(peak_discharge, 1),
           "mean_river_discharge_m3s": round(mean_discharge, 1),
-          "surface_runoff_risk": "HIGH" if runoff_factor > 0.6 else "MODERATE" if runoff_factor > 0.3 else "LOW",
+          "surface_runoff_risk": "HIGH" if excess_rain_mm > 15.0 or rain_48h >= 50.0 else "MODERATE" if excess_rain_mm > 0.0 or rain_48h >= 25.0 else "LOW",
           "model": "Copernicus GloFAS + Soil Saturation Runoff Index",
         },
         "drought": {
@@ -318,63 +347,27 @@ class LiveWeatherService:
     soil_moisture: float,
   ) -> dict[str, dict[str, str]]:
     """Generates localized action recommendations for the farmer."""
-    if flood_severity in ("HIGH", "CRITICAL") or rain_48h >= 30.0:
+    # 1. Real severe flood or field inundation hazard
+    if flood_severity in ("HIGH", "CRITICAL") or (rain_48h >= 50.0 and soil_moisture >= 40.0):
       return {
         "en": {
-          "title": "Heavy Rain & Waterlogging Advisory",
-          "action": f"Heavy rain of {rain_48h:.0f}mm forecast in next 48h. Open field drainage channels immediately to prevent root inundation. Suspend all planned irrigation.",
-          "cause": f"GloFAS river discharge peak and {rain_48h:.0f}mm rainfall forecast over saturated soil ({soil_moisture:.0f}% moisture).",
+          "title": "Severe Rain & Inundation Warning",
+          "action": f"Heavy rainfall of {rain_48h:.0f}mm forecast with high waterlogging risk. Open field drainage channels immediately to prevent root asphyxiation.",
+          "cause": f"Precipitation exceeds soil absorption capacity ({soil_moisture:.0f}% moisture).",
         },
         "hi": {
           "title": "भारी बारिश और जलभराव चेतावनी",
-          "action": f"अगले 48 घंटों में {rain_48h:.0f} मिमी बारिश का अनुमान है। खेतों के जल निकास नालों को तुरंत खोलें ताकि जड़ों में पानी न भरे। सिंचाई पूरी तरह रोकें।",
-          "cause": f"नदी बहाव में वृद्धि और गीली मिट्टी ({soil_moisture:.0f}% नमी) पर {rain_48h:.0f} मिमी बारिश का पूर्वानुमान।",
+          "action": f"अगले 48 घंटों में {rain_48h:.0f} मिमी भारी बारिश और जलभराव की आशंका है। खेतों के निकास नालों को तुरंत खोलें।",
+          "cause": f"बारिश की मात्रा मिट्टी की अवशोषण क्षमता से अधिक है ({soil_moisture:.0f}% नमी)।",
         },
         "mr": {
           "title": "मुसळधार पाऊस आणि पूर सदृश चेतावणी",
-          "action": f"पुढील ४८ तासांत {rain_48h:.0f} मिमी पावसाचा अंदाज आहे. शेतातील पाण्याचा निचरा होणारे चर त्वरित मोकळे करा. पाणी देणे पूर्णपणे थांबवा.",
-          "cause": f"नदी पात्रातील वाढता विसर्ग आणि ओल्या मातीवर ({soil_moisture:.0f}% ओलावा) {rain_48h:.0f} मिमी पावसाचा अंदाज.",
+          "action": f"पुढील ४८ तासांत {rain_48h:.0f} मिमी मुसळधार पाऊस आणि शेतात पाणी साचण्याची शक्यता आहे. पाण्याचा निचरा होणारे चर त्वरित मोकळे करा.",
+          "cause": f"पावसाचे प्रमाण मातीच्या पाणी शोषून घेण्याच्या क्षमतेपेक्षा जास्त आहे ({soil_moisture:.0f}% ओलावा).",
         },
       }
 
-    if rain_48h >= 10.0:
-      return {
-        "en": {
-          "title": "Rainfall Expected — Conserve Irrigation",
-          "action": f"Rainfall of {rain_48h:.0f}mm expected within 48 hours. Delay scheduled drip or flood irrigation by 2 days to save water and pumping power.",
-          "cause": "Incoming precipitation will naturally recharge root-zone soil moisture.",
-        },
-        "hi": {
-          "title": "बारिश का अनुमान — सिंचाई टालें",
-          "action": f"अगले 48 घंटों में {rain_48h:.0f} मिमी बारिश की संभावना है। पानी और बिजली बचाने के लिए 2 दिन सिंचाई टालें।",
-          "cause": "आने वाली बारिश से मिट्टी में प्राकृतिक रूप से नमी का स्तर बढ़ जाएगा।",
-        },
-        "mr": {
-          "title": "पावसाचा अंदाज — पाणी देणे पुढे ढकला",
-          "action": f"पुढील ४८ तासांत {rain_48h:.0f} मिमी पावसाची शक्यता आहे. पाणी व विजेची बचत करण्यासाठी नियोजित सिंचन २ दिवस पुढे ढकला.",
-          "cause": "होणाऱ्या पावसामुळे मातीतील मुळांच्या भागातील ओलावा नैसर्गिकरित्या भरून निघेल.",
-        },
-      }
-
-    if drought_severity in ("HIGH", "CRITICAL") or days_water_reserve <= 3.0:
-      return {
-        "en": {
-          "title": "Soil Aridity & Evaporative Stress Warning",
-          "action": f"Soil water reserves critical ({days_water_reserve:.1f} days remaining). Zero rain forecast. Initiate precision drip irrigation in morning hours.",
-          "cause": f"High atmospheric evaporative demand with dry soil ({soil_moisture:.0f}% moisture).",
-        },
-        "hi": {
-          "title": "मिट्टी में सूखे और वाष्पीकरण की चेतावनी",
-          "action": f"मिट्टी में केवल {days_water_reserve:.1f} दिन का पानी बचा है और बारिश का कोई अनुमान नहीं है। सुबह के समय ड्रिप सिंचाई शुरू करें।",
-          "cause": f"तेज धूप और शुष्क मिट्टी ({soil_moisture:.0f}% नमी) के कारण फसल जल तनाव में है।",
-        },
-        "mr": {
-          "title": "मातीतील पाण्याचा ताण व दुष्काळ चेतावणी",
-          "action": f"मातीत फक्त {days_water_reserve:.1f} दिवसांचा पाणी साठा शिल्लक आहे. पाऊस नसल्यामुळे सकाळच्या वेळी ठिबक सिंचन सुरू करा.",
-          "cause": f"कडक ऊन आणि कोरडी माती ({soil_moisture:.0f}% ओलावा) यामुळे पिकाला ताण बसत आहे.",
-        },
-      }
-
+    # 2. Extreme heat wave alert
     if heat_severity in ("HIGH", "CRITICAL"):
       return {
         "en": {
@@ -394,26 +387,87 @@ class LiveWeatherService:
         },
       }
 
+    # 3. High fungal disease / foliar spore outbreak (e.g. grape/vegetable downy mildew in humid conditions)
     if disease_severity == "HIGH":
       return {
         "en": {
           "title": "Microclimate Fungal Infection Window",
-          "action": "High relative humidity combined with warm temperatures creates spore germination conditions. Inspect lower leaf canopy for fungal spots.",
-          "cause": "Wallin index indicates active fungal pathogen window.",
+          "action": "High relative humidity and warm temperatures create prime spore germination conditions. Inspect lower leaf canopy for fungal spots and prepare bio-fungicide.",
+          "cause": "Wallin microclimate index indicates active fungal sporulation window.",
         },
         "hi": {
           "title": "कवक (फंगस) रोग प्रकोप की संभावना",
-          "action": "हवा में अत्यधिक नमी और गर्म मौसम के कारण फफूंद लगने का खतरा है। निचली पत्तियों की जांच करें और जरूरत पड़ने पर जैविक कवकनाशी छिड़कें।",
-          "cause": "मौसम फंगल बीजाणुओं के अंकुरण के अनुकूल है।",
+          "action": "हवा में अत्यधिक नमी और अनुकूल मौसम के कारण फफूंद (मिल्ड्यू/ब्लाइट) का खतरा है। पत्तियों के निचले हिस्से की जांच करें और जैविक कवकनाशी तैयार रखें।",
+          "cause": "मौसम फंगल बीजाणुओं के अंकुरण और प्रसार के लिए अनुकूल है।",
         },
         "mr": {
           "title": "बुरशीजन्य रोगाचा प्रादुर्भाव इशारा",
-          "action": "हवेतील जास्त आर्द्रता व उष्ण हवामानामुळे बुरशीची वाढ वेगाने होऊ शकते. पिकाच्या खालच्या पानांची तपासणी करून जैविक बुरशीनाशक फवारा.",
-          "cause": "हवामान बुरशीच्या वाढीसाठी अनुकूल आहे.",
+          "action": "हवेतील जास्त आर्द्रतेमुळे केवडा/भुरी (डाउनी/पावडरी मिल्ड्यू) यांसारख्या बुरशीचा धोका वाढला आहे. पानांच्या खालच्या बाजूची तपासणी करून जैविक बुरशीनाशक वापरा.",
+          "cause": "हवामान बुरशीच्या बीजाणू वाढीसाठी अत्यंत पोषक आहे.",
         },
       }
 
-    # Default balanced advisory
+    # 4. Moderate rain expected -> delay irrigation to conserve water
+    if rain_48h >= 18.0:
+      return {
+        "en": {
+          "title": "Rainfall Expected — Conserve Irrigation",
+          "action": f"Rainfall of {rain_48h:.0f}mm expected within 48 hours. Delay scheduled drip or flood irrigation by 2 days to save water and pumping power.",
+          "cause": "Incoming precipitation will naturally recharge root-zone soil moisture.",
+        },
+        "hi": {
+          "title": "बारिश का अनुमान — सिंचाई टालें",
+          "action": f"अगले 48 घंटों में {rain_48h:.0f} मिमी बारिश की संभावना है। पानी और बिजली बचाने के लिए 2 दिन सिंचाई टालें।",
+          "cause": "आने वाली बारिश से मिट्टी में प्राकृतिक रूप से नमी का स्तर बढ़ जाएगा।",
+        },
+        "mr": {
+          "title": "पावसाचा अंदाज — पाणी देणे पुढे ढकला",
+          "action": f"पुढील ४८ तासांत {rain_48h:.0f} मिमी पावसाची शक्यता आहे. पाणी व विजेची बचत करण्यासाठी नियोजित सिंचन २ दिवस पुढे ढकला.",
+          "cause": "होणाऱ्या पावसामुळे मातीतील मुळांच्या भागातील ओलावा नैसर्गिकरित्या भरून निघेल.",
+        },
+      }
+
+    # 5. Soil moisture deficit / drought stress
+    if drought_severity in ("HIGH", "CRITICAL") or days_water_reserve <= 3.0:
+      return {
+        "en": {
+          "title": "Soil Moisture Deficit Warning",
+          "action": f"Soil water reserves low ({days_water_reserve:.1f} days remaining). Minimal rain forecast. Initiate precision drip irrigation in morning hours.",
+          "cause": f"Dry soil ({soil_moisture:.0f}% moisture) with high evapotranspiration demand.",
+        },
+        "hi": {
+          "title": "मिट्टी में पानी की कमी की चेतावनी",
+          "action": f"मिट्टी में केवल {days_water_reserve:.1f} दिन का पानी बचा है। सुबह के समय ड्रिप सिंचाई शुरू करें।",
+          "cause": f"शुष्क मिट्टी ({soil_moisture:.0f}% नमी) के कारण फसल जल तनाव में है।",
+        },
+        "mr": {
+          "title": "मातीतील पाण्याचा ताण व सिंचन इशारा",
+          "action": f"मातीत फक्त {days_water_reserve:.1f} दिवसांचा पाणी साठा शिल्लक आहे. सकाळच्या वेळी ठिबक सिंचन सुरू करा.",
+          "cause": f"कोरडी माती ({soil_moisture:.0f}% ओलावा) यामुळे पिकाला पाण्याची तातडीची गरज आहे.",
+        },
+      }
+
+    # 6. Light showers
+    if rain_48h >= 5.0:
+      return {
+        "en": {
+          "title": "Light Showers Forecast — Root Refresh",
+          "action": f"Light showers of {rain_48h:.0f}mm forecast over 48h. Soil moisture ({soil_moisture:.0f}%) will receive mild replenishment without waterlogging.",
+          "cause": "Moderate atmospheric humidity and light scattered showers.",
+        },
+        "hi": {
+          "title": "हल्की बारिश का अनुमान",
+          "action": f"अगले 48 घंटों में {rain_48h:.0f} मिमी हल्की बारिश का अनुमान है। इससे मिट्टी ({soil_moisture:.0f}% नमी) को बिना जलभराव के हल्की ताजगी मिलेगी।",
+          "cause": "मध्यम आर्द्रता और हल्की बूंदाबांदी।",
+        },
+        "mr": {
+          "title": "हलक्या पावसाच्या सरींचा अंदाज",
+          "action": f"पुढील ४८ तासांत {rain_48h:.0f} मिमी हलक्या पावसाचा अंदाज आहे. यामुळे शेतात पाणी न साचता मातीला ({soil_moisture:.0f}% ओलावा) हलकी मदत मिळेल.",
+          "cause": "मध्यम आर्द्रता आणि हलक्या सरी.",
+        },
+      }
+
+    # 7. Balanced Microclimate
     return {
       "en": {
         "title": "Optimal Field Microclimate",
