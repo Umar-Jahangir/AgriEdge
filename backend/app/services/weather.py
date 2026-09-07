@@ -516,6 +516,85 @@ class LiveWeatherService:
       })
     return results
 
+  def get_irrigation_schedule(
+    self,
+    weather: dict[str, Any],
+    soil_moisture: float = 24.0,
+    soil_temp: float = 28.0,
+  ) -> dict[str, Any]:
+    """Computes precision irrigation schedule and water conservation metrics (PS §3 & §8)."""
+    daily = weather.get("daily", {})
+    daily_precip = daily.get("precipitation_sum", [0.0] * 7)
+    rain_48h = sum(daily_precip[:2]) if len(daily_precip) >= 2 else 0.0
+    
+    et0_list = daily.get("et0_fao_evapotranspiration", [4.0] * 7)
+    daily_et0 = et0_list[0] if et0_list else 4.2
+    
+    field_capacity = 40.0
+    moisture_deficit = max(0.0, field_capacity - soil_moisture)
+    
+    # Scenario A: Upcoming Rain -> Delay Irrigation to conserve water
+    if rain_48h >= 12.0:
+      status = "DELAYED_FOR_RAIN"
+      next_window = "Delayed 48h (Natural Rain Forecast)"
+      next_window_hi = "48 घंटे विलंबित (बारिश का पूर्वानुमान)"
+      next_window_mr = "४८ तास पुढे ढकलले (पावसाचा अंदाज)"
+      duration_mins = 0
+      water_volume_liters = 0
+      water_saved_liters = 3400  # Gallons/Liters saved per acre by holding off
+      rationale = f"Incoming 48h rain forecast ({rain_48h:.0f}mm) will naturally recharge root zone. Pumping suspended."
+      rationale_hi = f"अगले 48 घंटों में {rain_48h:.0f} मिमी बारिश की संभावना है। प्राकृतिक वर्षा से नमी भर जाएगी, इसलिए पंपिंग रोकी गई।"
+      rationale_mr = f"पुढील ४८ तासांत {rain_48h:.0f} मिमी पावसाचा अंदाज आहे. नैसर्गिक पावसामुळे पाणी भरून निघेल, म्हणून पंपिंग थांबवले आहे."
+      valve_recommended = "STANDBY"
+      
+    # Scenario B: Low Soil Moisture (<30%) -> Precision Morning Drip Irrigation
+    elif soil_moisture < 30.0:
+      status = "IRRIGATION_RECOMMENDED"
+      next_window = "Tomorrow at 06:00 AM – 06:45 AM"
+      next_window_hi = "कल सुबह 06:00 AM – 06:45 AM"
+      next_window_mr = "उद्या सकाळी ०६:०० AM – ०६:४५ AM"
+      duration_mins = min(60, max(30, int(round(moisture_deficit * 2.2))))
+      water_volume_liters = int(round(duration_mins * 28.0))
+      water_saved_liters = int(round(water_volume_liters * 0.35))  # Morning slot avoids 35% evaporative loss
+      rationale = f"Soil moisture at {soil_moisture:.0f}% requires replenishment. Early morning schedule minimizes solar evaporative loss by 35%."
+      rationale_hi = f"मिट्टी में नमी {soil_moisture:.0f}% है। सुबह 6 बजे ड्रिप सिंचाई से वाष्पीकरण का नुकसान 35% तक कम होगा।"
+      rationale_mr = f"मातीतील ओलावा {soil_moisture:.0f}% आहे. पहाटे ६ वाजता ठिबक सिंचनाने पाण्याचे बाष्पीभवन ३५% कमी होते."
+      valve_recommended = "SCHEDULED"
+
+    # Scenario C: Adequate Moisture (>=30%) -> Routine Monitoring
+    else:
+      status = "ADEQUATELY_HYDRATED"
+      next_window = "In 3 Days at 06:00 AM"
+      next_window_hi = "3 दिन बाद सुबह 06:00 AM"
+      next_window_mr = "३ दिवसांनंतर सकाळी ०६:०० AM"
+      duration_mins = 30
+      water_volume_liters = 840
+      water_saved_liters = 600
+      rationale = f"Soil moisture ({soil_moisture:.0f}%) is in optimal range. Continue moisture tracking."
+      rationale_hi = f"मिट्टी की नमी ({soil_moisture:.0f}%) संतुलित है। नियमित जांच जारी रखें।"
+      rationale_mr = f"मातीतील ओलावा ({soil_moisture:.0f}%) योग्य प्रमाणात आहे. नियमित निरीक्षण सुरू ठेवा."
+      valve_recommended = "STANDBY"
+
+    return {
+      "status": status,
+      "next_window": next_window,
+      "next_window_hi": next_window_hi,
+      "next_window_mr": next_window_mr,
+      "duration_minutes": duration_mins,
+      "water_volume_liters": water_volume_liters,
+      "water_saved_liters": water_saved_liters,
+      "rationale": rationale,
+      "rationale_hi": rationale_hi,
+      "rationale_mr": rationale_mr,
+      "current_soil_moisture": round(soil_moisture, 1),
+      "target_soil_moisture": field_capacity,
+      "rain_48h_forecast_mm": round(rain_48h, 1),
+      "evapotranspiration_rate_mm": round(daily_et0, 1),
+      "valve_recommended": valve_recommended,
+      "irrigation_method": "Precision Root-Zone Drip System",
+      "timestamp": datetime.utcnow().isoformat(),
+    }
+
   def _fallback_weather(self) -> dict[str, Any]:
     """Provides realistic seasonal fallback data for Maharashtra agricultural belt if offline."""
     now = datetime.utcnow()

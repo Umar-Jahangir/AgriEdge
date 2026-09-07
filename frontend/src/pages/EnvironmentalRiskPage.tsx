@@ -24,6 +24,7 @@ import { TimeRangeSelector } from '../components/ui/TimeRangeSelector';
 import { RiskBadge } from '../components/ui/StatusBadge';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
+import { SmartIrrigationCard } from '../components/irrigation/SmartIrrigationCard';
 import { useEnvironmentalRisk, useSensorHistory } from '../hooks/useData';
 import { useLanguage } from '../context/LanguageContext';
 import { cn } from '../utils/cn';
@@ -577,6 +578,9 @@ export function EnvironmentalRiskPage() {
           </div>
         </div>
       </div>
+
+      {/* Smart Precision Irrigation & Solenoid Valve Control */}
+      <SmartIrrigationCard lat={selectedLocation.lat} lon={selectedLocation.lon} />
 
       {/* 7-Day Weather & Precipitation Forecast */}
       <div className="space-y-3">

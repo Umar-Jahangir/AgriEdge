@@ -146,8 +146,29 @@ export interface Translations {
   today: string;
   sevenDays: string;
   thirtyDays: string;
-  ninetyDays: string;
   sector: string;
+
+  // Smart Irrigation & Solenoid Control
+  smartIrrigationTitle: string;
+  smartIrrigationSubtitle: string;
+  nextScheduledSlot: string;
+  waterRequired: string;
+  waterSaved: string;
+  durationLabel: string;
+  litersUnit: string;
+  solenoidRelayTitle: string;
+  solenoidModeAuto: string;
+  solenoidModeManual: string;
+  pumpRelayActive: string;
+  pumpRelayStandby: string;
+  pumpRelayOff: string;
+  triggerManualPump: string;
+  stopManualPump: string;
+  delayedForRainTitle: string;
+  irrigationRecommendedTitle: string;
+  hydratedTitle: string;
+  methodDrip: string;
+  minutesUnit: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -285,8 +306,28 @@ export const translations: Record<Language, Translations> = {
     today: 'Today',
     sevenDays: '7 Days',
     thirtyDays: '30 Days',
-    ninetyDays: '90 Days',
     sector: 'Sector',
+
+    smartIrrigationTitle: 'Smart Irrigation & Water Conservation',
+    smartIrrigationSubtitle: 'FAO-56 evapotranspiration & 48h rainfall predictive scheduling',
+    nextScheduledSlot: 'Next Scheduled Irrigation',
+    waterRequired: 'Water Required',
+    waterSaved: 'Conserved vs Flood',
+    durationLabel: 'Drip Duration',
+    litersUnit: 'Liters',
+    solenoidRelayTitle: 'Smart Solenoid / Pump Relay',
+    solenoidModeAuto: 'AUTO (AI Scheduled)',
+    solenoidModeManual: 'MANUAL OVERRIDE',
+    pumpRelayActive: 'PUMPING ACTIVE',
+    pumpRelayStandby: 'STANDBY (SCHEDULED)',
+    pumpRelayOff: 'OFFLINE / INACTIVE',
+    triggerManualPump: 'Trigger Pump Now',
+    stopManualPump: 'Stop Pump (Standby)',
+    delayedForRainTitle: 'Delayed — Rain Expected',
+    irrigationRecommendedTitle: 'Irrigation Recommended',
+    hydratedTitle: 'Optimal Soil Hydration',
+    methodDrip: 'Precision Root Drip',
+    minutesUnit: 'min',
   },
 
   hi: {
@@ -423,8 +464,28 @@ export const translations: Record<Language, Translations> = {
     today: 'आज',
     sevenDays: '7 दिन',
     thirtyDays: '30 दिन',
-    ninetyDays: '90 दिन',
     sector: 'भाग / जोन',
+
+    smartIrrigationTitle: 'स्मार्ट सिंचाई एवं जल संरक्षण',
+    smartIrrigationSubtitle: 'FAO-56 वाष्पोत्सर्जन व 48 घंटे वर्षा पूर्वानुमान आधारित स्वचालित शेड्यूलिंग',
+    nextScheduledSlot: 'अगली निर्धारित सिंचाई',
+    waterRequired: 'आवश्यक जल मात्रा',
+    waterSaved: 'बचत किया गया पानी',
+    durationLabel: 'ड्रिप अवधि',
+    litersUnit: 'लीटर',
+    solenoidRelayTitle: 'स्मार्ट सोलेनोइड / पंप रिले',
+    solenoidModeAuto: 'स्वचालित (AI शेड्यूल्ड)',
+    solenoidModeManual: 'मैनुअल ओवरराइड',
+    pumpRelayActive: 'सिंचाई चालू (सक्रिय)',
+    pumpRelayStandby: 'स्टैंडबाय (प्रतीक्षारत)',
+    pumpRelayOff: 'बंद / निष्क्रिय',
+    triggerManualPump: 'अभी पंप चालू करें',
+    stopManualPump: 'पंप बंद करें (स्टैंडबाय)',
+    delayedForRainTitle: 'स्थगित — वर्षा का अनुमान',
+    irrigationRecommendedTitle: 'सिंचाई की सिफारिश',
+    hydratedTitle: 'अनुकूल मृदा नमी स्तर',
+    methodDrip: 'सटीक ड्रिप प्रणाली',
+    minutesUnit: 'मिनट',
   },
 
   mr: {
@@ -561,8 +622,28 @@ export const translations: Record<Language, Translations> = {
     today: 'आज',
     sevenDays: '७ दिवस',
     thirtyDays: '३० दिवस',
-    ninetyDays: '९० दिवस',
     sector: 'विभाग / झोन',
+
+    smartIrrigationTitle: 'स्मार्ट सिंचन व जलसंधारण',
+    smartIrrigationSubtitle: 'FAO-56 बाष्पीभवन व ४८ तास पावसाच्या पूर्वानुमानावर आधारित नियोजन',
+    nextScheduledSlot: 'पुढील नियोजित सिंचन',
+    waterRequired: 'आवश्यक पाणी',
+    waterSaved: 'वाचवलेले पाणी',
+    durationLabel: 'ठिबक वेळ',
+    litersUnit: 'लिटर',
+    solenoidRelayTitle: 'स्मार्ट सोलेनॉइड / पंप रिले',
+    solenoidModeAuto: 'स्वयंचलित (AI नियोजित)',
+    solenoidModeManual: 'मॅन्युअल ओव्हरराइड',
+    pumpRelayActive: 'सिंचन सुरू (सक्रिय)',
+    pumpRelayStandby: 'स्टँडबाय (प्रतिक्षेत)',
+    pumpRelayOff: 'बंद / निष्क्रिय',
+    triggerManualPump: 'आता पंप सुरू करा',
+    stopManualPump: 'पंप बंद करा (स्टँडबाय)',
+    delayedForRainTitle: 'पुढे ढकलले — पाऊस अपेक्षित',
+    irrigationRecommendedTitle: 'सिंचनाची शिफारस',
+    hydratedTitle: 'मातीत योग्य ओलावा',
+    methodDrip: 'अचूक ठिबक पद्धत',
+    minutesUnit: 'मिनिटे',
   },
 };
 
