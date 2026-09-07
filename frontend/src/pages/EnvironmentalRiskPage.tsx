@@ -15,6 +15,9 @@ import {
   Volume2,
   Sparkles,
   Calendar,
+  MapPin,
+  Navigation,
+  X,
 } from 'lucide-react';
 import { ChartCard, TrendAreaChart } from '../components/ui/ChartCard';
 import { TimeRangeSelector } from '../components/ui/TimeRangeSelector';
@@ -25,6 +28,29 @@ import { useEnvironmentalRisk, useSensorHistory } from '../hooks/useData';
 import { useLanguage } from '../context/LanguageContext';
 import { cn } from '../utils/cn';
 
+interface FarmLocation {
+  name: string;
+  state: string;
+  lat: number;
+  lon: number;
+  cropFocus?: string;
+}
+
+const PRESET_LOCATIONS: FarmLocation[] = [
+  { name: 'Pune (Baramati)', state: 'Maharashtra', lat: 18.5204, lon: 73.8567, cropFocus: 'Sugarcane, Vegetables, Grapes' },
+  { name: 'Nashik', state: 'Maharashtra', lat: 19.9975, lon: 73.7898, cropFocus: 'Onions, Grapes, Pomegranate' },
+  { name: 'Nagpur (Vidarbha)', state: 'Maharashtra', lat: 21.1458, lon: 79.0882, cropFocus: 'Cotton, Oranges, Soybeans' },
+  { name: 'Guwahati (Brahmaputra)', state: 'Assam', lat: 26.1445, lon: 91.7362, cropFocus: 'Tea, Paddy Rice, Jute' },
+  { name: 'Jorhat (Upper Assam)', state: 'Assam', lat: 26.7509, lon: 94.2037, cropFocus: 'Tea Gardens & Floodplain Paddy' },
+  { name: 'Chitwan (Terai Belt)', state: 'Nepal', lat: 27.6833, lon: 84.4333, cropFocus: 'Paddy Rice, Maize, Mustard' },
+  { name: 'Kathmandu Valley', state: 'Nepal', lat: 27.7172, lon: 85.3240, cropFocus: 'Terraced Paddy, Maize, Vegetables' },
+  { name: 'Ludhiana', state: 'Punjab', lat: 30.9010, lon: 75.8573, cropFocus: 'Wheat & Paddy Rice' },
+  { name: 'Karnal', state: 'Haryana', lat: 29.6857, lon: 76.9905, cropFocus: 'Basmati Rice & Mustard' },
+  { name: 'Indore (Malwa)', state: 'Madhya Pradesh', lat: 22.7196, lon: 75.8577, cropFocus: 'Soybean, Wheat, Garlic' },
+  { name: 'Guntur', state: 'Andhra Pradesh', lat: 16.3067, lon: 80.4365, cropFocus: 'Chilli, Tobacco, Cotton' },
+  { name: 'Vijayapura', state: 'Karnataka', lat: 16.8302, lon: 75.7100, cropFocus: 'Jowar, Grapes, Lime' },
+];
+
 const timeOptions = [
   { value: 'today', label: 'TODAY' },
   { value: '7d', label: '7 DAYS' },
@@ -33,9 +59,72 @@ const timeOptions = [
 
 export function EnvironmentalRiskPage() {
   const [range, setRange] = useState<'today' | '7d' | '30d'>('7d');
-  const { data: risk, loading, error, refetch } = useEnvironmentalRisk();
+  const [selectedLocation, setSelectedLocation] = useState<FarmLocation>(() => {
+    try {
+      const saved = localStorage.getItem('agriedge_farm_location');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return PRESET_LOCATIONS[0];
+  });
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [customLat, setCustomLat] = useState('');
+  const [customLon, setCustomLon] = useState('');
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  const { data: risk, loading, error, refetch } = useEnvironmentalRisk(selectedLocation.lat, selectedLocation.lon);
   const { data: history, loading: historyLoading } = useSensorHistory(range);
   const { t, language, speakText, isSpeaking } = useLanguage();
+
+  const handleSelectPreset = (loc: FarmLocation) => {
+    setSelectedLocation(loc);
+    localStorage.setItem('agriedge_farm_location', JSON.stringify(loc));
+    setIsLocationModalOpen(false);
+  };
+
+  const handleSetCustomLocation = () => {
+    const latNum = parseFloat(customLat);
+    const lonNum = parseFloat(customLon);
+    if (isNaN(latNum) || isNaN(lonNum)) return;
+    const newLoc: FarmLocation = {
+      name: `Custom Location (${latNum.toFixed(2)}°, ${lonNum.toFixed(2)}°)`,
+      state: 'India',
+      lat: latNum,
+      lon: lonNum,
+    };
+    setSelectedLocation(newLoc);
+    localStorage.setItem('agriedge_farm_location', JSON.stringify(newLoc));
+    setIsLocationModalOpen(false);
+  };
+
+  const handleDetectGps = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = parseFloat(pos.coords.latitude.toFixed(4));
+        const lon = parseFloat(pos.coords.longitude.toFixed(4));
+        const newLoc: FarmLocation = {
+          name: `My GPS Field (${lat}°, ${lon}°)`,
+          state: 'Local Field',
+          lat,
+          lon,
+          cropFocus: 'Live In-Situ Farm Telemetry',
+        };
+        setSelectedLocation(newLoc);
+        localStorage.setItem('agriedge_farm_location', JSON.stringify(newLoc));
+        setGpsLoading(false);
+        setIsLocationModalOpen(false);
+      },
+      (err) => {
+        setGpsLoading(false);
+        alert(`Could not detect GPS location: ${err.message}. Please select a preset.`);
+      },
+      { timeout: 10000 }
+    );
+  };
 
   if (loading) return <LoadingState message="Connecting to live satellite & GloFAS flood models..." />;
   if (error || !risk) return <ErrorState message={error || 'Failed to load telemetry'} onRetry={refetch} />;
@@ -83,30 +172,129 @@ export function EnvironmentalRiskPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-2 border-b border-earth-300 pb-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+      {/* Header & Location Banner */}
+      <div className="flex flex-col gap-3 border-b border-earth-300 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-semibold text-farm-800">
               {t('liveWeatherTitle')}
             </span>
             <span className="rounded bg-earth-100 px-2 py-0.5 text-[10px] font-semibold text-earth-700">
-              Open-Meteo & GloFAS
+              Open-Meteo & GloFAS Live Feed
             </span>
           </div>
-          <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-earth-950 sm:text-3xl">
+
+          {/* Active Location Badge & Change Location Trigger */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-earth-300 bg-white px-3 py-1.5 text-xs font-semibold text-earth-800 shadow-2xs hover:bg-earth-100 hover:border-earth-400 transition-colors"
+              title="Change Farm Location"
+            >
+              <MapPin className="h-3.5 w-3.5 text-farm-700" />
+              <span>{selectedLocation.name} ({selectedLocation.lat.toFixed(2)}°N, {selectedLocation.lon.toFixed(2)}°E)</span>
+              <span className="text-[10px] text-farm-800 font-bold ml-1 uppercase underline">Change</span>
+            </button>
+            <TimeRangeSelector options={timeOptions} value={range} onChange={(v) => setRange(v as typeof range)} />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="font-display text-2xl font-bold tracking-tight text-earth-950 sm:text-3xl">
             {t('environmentalRisk')} & Weather Intelligence
           </h2>
           <p className="mt-0.5 text-xs text-earth-600">
-            Open-source Copernicus GloFAS flood & FAO-56 SPEI drought models fused with in-situ rover sensors.
+            Real-time weather, GloFAS river discharge, and microclimate risk predictions for <strong className="text-earth-900">{selectedLocation.name}, {selectedLocation.state}</strong>.
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <TimeRangeSelector options={timeOptions} value={range} onChange={(v) => setRange(v as typeof range)} />
-        </div>
       </div>
+
+      {/* Location Selection Modal */}
+      {isLocationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-in">
+          <div className="w-full max-w-lg rounded-lg border border-earth-300 bg-white p-5 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-earth-200 pb-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-farm-800" />
+                <h3 className="font-display text-base font-bold text-earth-900">Select Farm Location</h3>
+              </div>
+              <button
+                onClick={() => setIsLocationModalOpen(false)}
+                className="p-1 text-earth-400 hover:text-earth-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* GPS Auto-Detect */}
+            <button
+              onClick={handleDetectGps}
+              disabled={gpsLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-farm-700 bg-farm-50 p-2.5 text-xs font-bold text-farm-900 hover:bg-farm-100 transition-colors"
+            >
+              <Navigation className={cn("h-4 w-4 text-farm-800", gpsLoading && "animate-spin")} />
+              <span>{gpsLoading ? 'Detecting GPS Coordinates...' : 'Detect My Current Field GPS Location'}</span>
+            </button>
+
+            {/* Presets List */}
+            <div>
+              <p className="text-xs font-semibold text-earth-700 mb-2">Preset Agricultural Regions (India & Nepal):</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
+                {PRESET_LOCATIONS.map((loc) => {
+                  const isSelected = selectedLocation.name === loc.name;
+                  return (
+                    <button
+                      key={loc.name}
+                      onClick={() => handleSelectPreset(loc)}
+                      className={cn(
+                        'flex flex-col text-left p-2.5 rounded border text-xs transition-colors',
+                        isSelected
+                          ? 'border-farm-800 bg-farm-50 font-semibold'
+                          : 'border-earth-200 hover:bg-earth-50'
+                      )}
+                    >
+                      <span className="font-bold text-earth-950">{loc.name}</span>
+                      <span className="text-[10px] text-earth-500">{loc.state} ({loc.lat}°N, {loc.lon}°E)</span>
+                      {loc.cropFocus && <span className="text-[10px] text-farm-700 mt-0.5 truncate">{loc.cropFocus}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Coordinate Form */}
+            <div className="border-t border-earth-200 pt-3">
+              <p className="text-xs font-semibold text-earth-700 mb-2">Or Enter Custom Coordinates:</p>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  step="0.0001"
+                  placeholder="Latitude (e.g. 19.99)"
+                  value={customLat}
+                  onChange={(e) => setCustomLat(e.target.value)}
+                  className="flex-1 rounded border border-earth-300 px-2.5 py-1.5 text-xs font-mono outline-none focus:border-farm-700"
+                />
+                <input
+                  type="number"
+                  step="0.0001"
+                  placeholder="Longitude (e.g. 73.78)"
+                  value={customLon}
+                  onChange={(e) => setCustomLon(e.target.value)}
+                  className="flex-1 rounded border border-earth-300 px-2.5 py-1.5 text-xs font-mono outline-none focus:border-farm-700"
+                />
+                <button
+                  onClick={handleSetCustomLocation}
+                  disabled={!customLat || !customLon}
+                  className="rounded bg-farm-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-farm-800 disabled:opacity-50"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Live Atmospheric Ribbon */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

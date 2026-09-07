@@ -223,7 +223,7 @@ export const translations: Record<Language, Translations> = {
     active: 'Active',
     resolved: 'Resolved',
 
-    droughtRisk: 'Drought Risk',
+    droughtRisk: 'Drought & Water Deficit',
     floodRisk: 'Flood & Waterlogging Risk',
     heatStressRisk: 'Heat Wave Risk',
     diseaseRisk: 'Foliar Disease Risk',
@@ -361,8 +361,8 @@ export const translations: Record<Language, Translations> = {
     active: 'सक्रिय',
     resolved: 'हल किया गया',
 
-    droughtRisk: 'सूखे का खतरा',
-    floodRisk: 'जलभराव एवं बाढ़ का खतरा',
+    droughtRisk: 'सूखा एवं जल तनाव',
+    floodRisk: 'बाढ़ और जलभराव जोखिम',
     heatStressRisk: 'लू / अत्यधिक गर्मी का खतरा',
     diseaseRisk: 'पत्तियों में फंगल रोग का खतरा',
     waterStressRisk: 'पानी की कमी का खतरा',
@@ -499,8 +499,8 @@ export const translations: Record<Language, Translations> = {
     active: 'सक्रिय',
     resolved: 'निवारण झाले',
 
-    droughtRisk: 'दुष्काळ जोखीम',
-    floodRisk: 'अतिवृष्टी व पूर जोखीम',
+    droughtRisk: 'दुष्काळ व पाण्याचा ताण',
+    floodRisk: 'पूर आणि जलमय स्थितीचा धोका',
     heatStressRisk: 'उष्णतेची लाट जोखीम',
     diseaseRisk: 'पानावरील बुरशीजन्य रोग जोखीम',
     waterStressRisk: 'पाण्याचा ताण',

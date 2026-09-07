@@ -54,7 +54,7 @@ function toCamelCase(value: unknown): unknown {
   if (value && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => [
-        key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()),
+        key.replace(/_([a-z0-9])/g, (_, letter: string) => letter.toUpperCase()),
         toCamelCase(item),
       ])
     );
@@ -260,12 +260,13 @@ export const api = {
     return toRoverStatus(await postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_EMERGENCY_STOP));
   },
 
-  async getEnvironmentalRisk(): Promise<EnvironmentalRisk> {
+  async getEnvironmentalRisk(lat?: number, lon?: number): Promise<EnvironmentalRisk> {
     if (API_CONFIG.USE_MOCK) {
       await delay();
       return mockEnvironmentalRisk;
     }
-    return fetchAPI<EnvironmentalRisk>(API_CONFIG.ENDPOINTS.ENVIRONMENTAL_RISK);
+    const query = lat !== undefined && lon !== undefined ? `?lat=${lat}&lon=${lon}` : '';
+    return fetchAPI<EnvironmentalRisk>(`${API_CONFIG.ENDPOINTS.ENVIRONMENTAL_RISK}${query}`);
   },
 
   async getAnalytics(range: TimeRange): Promise<AnalyticsData> {

@@ -50,8 +50,8 @@ export function useCropAnalyses() {
   return useAsyncData(() => api.getCropAnalyses());
 }
 
-export function useEnvironmentalRisk() {
-  return useAsyncData(() => api.getEnvironmentalRisk());
+export function useEnvironmentalRisk(lat?: number, lon?: number) {
+  return useAsyncData(() => api.getEnvironmentalRisk(lat, lon), [lat, lon]);
 }
 
 export function useFarmZones() {

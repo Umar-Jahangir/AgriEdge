@@ -192,6 +192,7 @@ export interface EnvironmentalRisk {
   weatherCondition?: string;
   weatherIntegrationPending: boolean;
   timestamp: string;
+  location?: { latitude: number; longitude: number };
   currentWeather?: CurrentWeather;
   predictions?: AgroPredictions;
   dailyForecast?: DailyForecastItem[];
