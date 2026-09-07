@@ -70,3 +70,32 @@ def test_environmental_risk():
   assert data["weather_integration_pending"] is False
 
 
+def test_irrigation_schedule():
+  r = client.get("/api/irrigation/schedule")
+  assert r.status_code == 200
+  data = r.json()
+  assert "status" in data
+  assert "next_window" in data
+  assert "duration_minutes" in data
+  assert "water_volume_liters" in data
+  assert "water_saved_liters" in data
+  assert "relay_state" in data
+  assert data["relay_state"]["mode"] in ("AUTO", "MANUAL")
+
+
+def test_irrigation_valve_control():
+  # Set to MANUAL ACTIVE
+  r = client.post("/api/irrigation/valve", json={"mode": "MANUAL", "state": "ACTIVE"})
+  assert r.status_code == 200
+  data = r.json()
+  assert data["status"] == "success"
+  assert data["relay_state"]["mode"] == "MANUAL"
+  assert data["relay_state"]["state"] == "ACTIVE"
+  assert data["relay_state"]["pump_active"] is True
+
+  # Set back to AUTO STANDBY
+  r2 = client.post("/api/irrigation/valve", json={"mode": "AUTO", "state": "STANDBY"})
+  assert r2.status_code == 200
+  assert r2.json()["relay_state"]["pump_active"] is False
+
+

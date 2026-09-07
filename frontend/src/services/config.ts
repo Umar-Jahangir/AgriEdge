@@ -23,5 +23,7 @@ export const API_CONFIG = {
     FARM_MAP: '/api/farm-map',
     AI_ANALYSIS: '/api/ai-analysis',
     SYSTEM_STATUS: '/api/system-status',
+    IRRIGATION_SCHEDULE: '/api/irrigation/schedule',
+    IRRIGATION_VALVE: '/api/irrigation/valve',
   },
 } as const;

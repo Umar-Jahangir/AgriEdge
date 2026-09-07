@@ -8,7 +8,9 @@ import type {
   EnvironmentalRisk,
   FarmMapData,
   FarmZone,
+  IrrigationSchedule,
   Recommendation,
+  RelayState,
   RoverState,
   RoverStatus,
   SensorReading,
@@ -422,6 +424,48 @@ export function filterAlerts(alerts: Alert[], filter: AlertFilter): Alert[] {
   if (filter === 'all') return alerts;
   if (filter === 'resolved') return alerts.filter((a) => a.status === 'resolved');
   return alerts.filter((a) => a.severity.toLowerCase() === filter);
+}
+
+let simulatedRelayState: RelayState = {
+  mode: 'AUTO',
+  state: 'STANDBY',
+  pumpActive: false,
+  lastUpdated: new Date().toISOString(),
+};
+
+export const mockIrrigationSchedule: IrrigationSchedule = {
+  status: 'IRRIGATION_RECOMMENDED',
+  nextWindow: 'Tomorrow at 06:00 AM – 06:45 AM',
+  nextWindowHi: 'कल सुबह 06:00 AM – 06:45 AM',
+  nextWindowMr: 'उद्या सकाळी ०६:०० AM – ०६:४५ AM',
+  durationMinutes: 45,
+  waterVolumeLiters: 1260,
+  waterSavedLiters: 440,
+  rationale: 'Soil moisture at 24% requires replenishment. Early morning schedule minimizes solar evaporative loss by 35%.',
+  rationaleHi: 'मिट्टी में नमी 24% है। सुबह 6 बजे ड्रिप सिंचाई से वाष्पीकरण का नुकसान 35% तक कम होगा।',
+  rationaleMr: 'मातीतील ओलावा २४% आहे. पहाटे ६ वाजता ठिबक सिंचनाने पाण्याचे बाष्पीभवन ३५% कमी होते.',
+  currentSoilMoisture: 24.0,
+  targetSoilMoisture: 40.0,
+  rain48hForecastMm: 0.0,
+  evapotranspirationRateMm: 4.2,
+  valveRecommended: 'SCHEDULED',
+  irrigationMethod: 'Precision Root-Zone Drip System',
+  timestamp: new Date().toISOString(),
+  relayState: simulatedRelayState,
+};
+
+export function setSimulatedRelay(mode: 'AUTO' | 'MANUAL', state: 'STANDBY' | 'ACTIVE' | 'OFF'): RelayState {
+  simulatedRelayState = {
+    mode,
+    state,
+    pumpActive: state === 'ACTIVE',
+    lastUpdated: new Date().toISOString(),
+  };
+  return { ...simulatedRelayState };
+}
+
+export function getSimulatedRelay(): RelayState {
+  return { ...simulatedRelayState };
 }
 
 export type { RoverState };

@@ -11,6 +11,9 @@ import {
   mockRecommendations,
   mockSoilAnalysis,
   mockSystemStatus,
+  mockIrrigationSchedule,
+  setSimulatedRelay,
+  getSimulatedRelay,
   getMockAnalytics,
   getMockHistory,
   getSimulatedRoverStatus,
@@ -28,7 +31,9 @@ import type {
   FarmMapData,
   FarmZone,
   HistoricalDataPoint,
+  IrrigationSchedule,
   Recommendation,
+  RelayState,
   RoverStatus,
   SensorReading,
   SoilAnalysis,
@@ -309,5 +314,33 @@ export const api = {
       return mockSystemStatus;
     }
     return fetchAPI<SystemStatus>(API_CONFIG.ENDPOINTS.SYSTEM_STATUS);
+  },
+
+  async getIrrigationSchedule(lat?: number, lon?: number): Promise<IrrigationSchedule> {
+    if (API_CONFIG.USE_MOCK) {
+      await delay(200);
+      return { ...mockIrrigationSchedule, relayState: getSimulatedRelay() };
+    }
+    const query = lat !== undefined && lon !== undefined ? `?lat=${lat}&lon=${lon}` : '';
+    return fetchAPI<IrrigationSchedule>(`${API_CONFIG.ENDPOINTS.IRRIGATION_SCHEDULE}${query}`);
+  },
+
+  async setIrrigationValve(
+    mode: 'AUTO' | 'MANUAL',
+    state: 'STANDBY' | 'ACTIVE' | 'OFF'
+  ): Promise<{ status: string; relayState: RelayState; message: string }> {
+    if (API_CONFIG.USE_MOCK) {
+      await delay(150);
+      const relay = setSimulatedRelay(mode, state);
+      return {
+        status: 'success',
+        relayState: relay,
+        message: `Irrigation pump relay set to ${state} (${mode} mode)`,
+      };
+    }
+    return postAPI<{ status: string; relayState: RelayState; message: string }>(
+      API_CONFIG.ENDPOINTS.IRRIGATION_VALVE,
+      { mode, state }
+    );
   },
 };

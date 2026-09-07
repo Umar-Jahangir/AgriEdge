@@ -77,3 +77,7 @@ export function useAnalytics(range: '7d' | '30d' | '90d') {
 export function useAlerts(filter: 'all' | 'critical' | 'high' | 'medium' | 'low' | 'resolved') {
   return useAsyncData(() => api.getAlerts(filter), [filter]);
 }
+
+export function useIrrigationSchedule(lat?: number, lon?: number) {
+  return useAsyncData(() => api.getIrrigationSchedule(lat, lon), [lat, lon]);
+}

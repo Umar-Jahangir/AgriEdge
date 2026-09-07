@@ -325,6 +325,52 @@ async def environmental_risk(lat: float | None = None, lon: float | None = None)
   }
 
 
+class ValveControlRequest(BaseModel):
+  mode: str = "AUTO"  # "AUTO" | "MANUAL"
+  state: str = "STANDBY"  # "STANDBY" | "ACTIVE" | "OFF"
+
+
+_irrigation_relay_state = {
+  "mode": "AUTO",
+  "state": "STANDBY",
+  "pump_active": False,
+  "last_updated": datetime.utcnow().isoformat(),
+}
+
+
+@router.get("/irrigation/schedule")
+async def irrigation_schedule(lat: float | None = None, lon: float | None = None):
+  """Computes smart irrigation schedule and water conservation metrics based on soil moisture and 48h rain forecast."""
+  zone = get_demo_zone("ZONE_B")
+  weather = await live_weather_service.get_live_weather(lat, lon)
+  schedule = live_weather_service.get_irrigation_schedule(
+    weather=weather,
+    soil_moisture=zone.get("soil_moisture", 24.0),
+    soil_temp=zone.get("soil_temperature", 28.0),
+  )
+  schedule["relay_state"] = _irrigation_relay_state
+  return schedule
+
+
+@router.post("/irrigation/valve")
+def control_irrigation_valve(req: ValveControlRequest):
+  """Allows manual or automated override of the smart farm solenoid valve / pump relay."""
+  global _irrigation_relay_state
+  mode = req.mode.upper()
+  state = req.state.upper()
+  _irrigation_relay_state = {
+    "mode": mode,
+    "state": state,
+    "pump_active": state == "ACTIVE",
+    "last_updated": datetime.utcnow().isoformat(),
+  }
+  return {
+    "status": "success",
+    "relay_state": _irrigation_relay_state,
+    "message": f"Irrigation pump relay set to {state} ({mode} mode)",
+  }
+
+
 @router.get("/analytics")
 def analytics(range: str = "7d"):
   history = sensor_history(range)

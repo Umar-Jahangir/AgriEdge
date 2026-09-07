@@ -269,3 +269,31 @@ export interface FarmMapData {
   zones: FarmZone[];
   attentionAreas: { x: number; y: number; zoneId: string }[];
 }
+
+export interface RelayState {
+  mode: 'AUTO' | 'MANUAL';
+  state: 'STANDBY' | 'ACTIVE' | 'OFF';
+  pumpActive: boolean;
+  lastUpdated?: string;
+}
+
+export interface IrrigationSchedule {
+  status: 'DELAYED_FOR_RAIN' | 'IRRIGATION_RECOMMENDED' | 'ADEQUATELY_HYDRATED';
+  nextWindow: string;
+  nextWindowHi?: string;
+  nextWindowMr?: string;
+  durationMinutes: number;
+  waterVolumeLiters: number;
+  waterSavedLiters: number;
+  rationale: string;
+  rationaleHi?: string;
+  rationaleMr?: string;
+  currentSoilMoisture: number;
+  targetSoilMoisture: number;
+  rain48hForecastMm: number;
+  evapotranspirationRateMm: number;
+  valveRecommended: 'STANDBY' | 'SCHEDULED' | 'ACTIVE';
+  irrigationMethod: string;
+  timestamp: string;
+  relayState: RelayState;
+}
