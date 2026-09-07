@@ -156,3 +156,6 @@ agent-transcripts/
 
 # ----- pytest / coverage already above; Jupyter -----
 *.nbconvert.ipynb
+
+# Plant-disease dataset (~2 GiB, rebuilt via plant-disease/download.sh)
+plant-disease/data/
