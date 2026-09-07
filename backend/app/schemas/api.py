@@ -43,6 +43,13 @@ class ZoneSummary(BaseModel):
     crop_health: int
     risk_level: str
     sampling_coverage: int
+    crop_type: str | None = "Tomato (Abhinav F1)"
+    growth_stage: str | None = "Vegetative Stage"
+    growth_stage_hi: str | None = None
+    growth_stage_mr: str | None = None
+    stage_day: int | None = 34
+    gdd_accumulated: int | None = 500
+    yield_risk_pct: float | None = 10.0
 
 
 class ZoneDetail(ZoneSummary):
@@ -216,4 +223,39 @@ class DashboardNPK(BaseModel):
     nitrogen_status: str
     phosphorus_status: str
     potassium_status: str
+    timestamp: str
+
+
+class ZoneYieldRisk(BaseModel):
+    zone_id: str
+    zone_name: str
+    crop_type: str
+    growth_stage: str
+    growth_stage_hi: str | None = None
+    growth_stage_mr: str | None = None
+    stage_day: int
+    gdd_accumulated: int
+    yield_risk_level: str
+    yield_risk_pct: float
+    expected_yield_quintals_per_acre: float
+    potential_yield_quintals_per_acre: float
+    yield_saved_quintals_per_acre: float
+    water_penalty_pct: float
+    nutrient_penalty_pct: float
+    disease_penalty_pct: float
+    critical_sensitivity: bool
+
+
+class YieldRiskResponse(BaseModel):
+    overall_yield_risk: str
+    projected_yield_risk_pct: float
+    yield_saved_quintals_per_acre: float
+    pesticide_savings_inr_per_ha: int
+    revenue_preserved_inr_per_acre: int
+    potential_yield_quintals_per_acre: float
+    crop_type: str
+    blanket_spray_cost_inr_per_ha: float
+    targeted_spray_cost_inr_per_ha: float
+    zones: list[ZoneYieldRisk]
+    decision_insights: dict[str, str]
     timestamp: str

@@ -12,6 +12,7 @@ import {
   mockSoilAnalysis,
   mockSystemStatus,
   mockIrrigationSchedule,
+  mockYieldRiskForecast,
   setSimulatedRelay,
   getSimulatedRelay,
   getMockAnalytics,
@@ -39,6 +40,7 @@ import type {
   SoilAnalysis,
   SystemStatus,
   TimeRange,
+  YieldRiskForecast,
 } from '../types';
 
 export interface SensorHistoryData {
@@ -342,5 +344,13 @@ export const api = {
       API_CONFIG.ENDPOINTS.IRRIGATION_VALVE,
       { mode, state }
     );
+  },
+
+  async getYieldRisk(): Promise<YieldRiskForecast> {
+    if (API_CONFIG.USE_MOCK) {
+      await delay(200);
+      return mockYieldRiskForecast;
+    }
+    return fetchAPI<YieldRiskForecast>(API_CONFIG.ENDPOINTS.YIELD_RISK);
   },
 };

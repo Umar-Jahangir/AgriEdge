@@ -99,3 +99,28 @@ def test_irrigation_valve_control():
   assert r2.json()["relay_state"]["pump_active"] is False
 
 
+def test_yield_risk_forecast():
+  r = client.get("/api/yield-risk")
+  assert r.status_code == 200
+  data = r.json()
+  assert "overall_yield_risk" in data
+  assert "projected_yield_risk_pct" in data
+  assert data["yield_saved_quintals_per_acre"] == 1.8
+  assert data["pesticide_savings_inr_per_ha"] == 3800
+  assert data["revenue_preserved_inr_per_acre"] > 0
+  assert len(data["zones"]) == 4
+  assert data["zones"][0]["growth_stage"] == "Vegetative Stage"
+  assert data["zones"][1]["growth_stage"] == "Flowering & Anthesis"
+
+
+def test_zone_growth_stages_in_zones_endpoint():
+  r = client.get("/api/zones")
+  assert r.status_code == 200
+  zones = r.json()
+  assert len(zones) == 4
+  for z in zones:
+    assert "growth_stage" in z
+    assert "stage_day" in z
+    assert "yield_risk_pct" in z
+
+
