@@ -9,18 +9,18 @@ interface StatusBadgeProps {
 }
 
 const variants = {
-  default: 'bg-earth-100 text-earth-700',
-  success: 'bg-farm-50 text-farm-700',
-  warning: 'bg-amber-50 text-amber-700',
-  danger: 'bg-red-50 text-red-700',
-  info: 'bg-blue-50 text-blue-700',
+  default: 'bg-earth-100 text-earth-900 border border-earth-300',
+  success: 'bg-farm-100/70 text-farm-900 border border-farm-500/60',
+  warning: 'bg-amber-100/70 text-amber-950 border border-amber-500/60',
+  danger: 'bg-red-100/70 text-red-950 border border-red-500/60',
+  info: 'bg-sky-100/70 text-sky-950 border border-sky-500/60',
 };
 
 export function StatusBadge({ label, variant = 'default', dot, className }: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center gap-1.5 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider',
         variants[variant],
         className
       )}
@@ -28,12 +28,12 @@ export function StatusBadge({ label, variant = 'default', dot, className }: Stat
       {dot && (
         <span
           className={cn(
-            'h-1.5 w-1.5 rounded-full',
-            variant === 'success' && 'bg-farm-500 animate-pulse-dot',
-            variant === 'warning' && 'bg-amber-500',
-            variant === 'danger' && 'bg-red-500',
-            variant === 'info' && 'bg-blue-500',
-            variant === 'default' && 'bg-earth-400'
+            'h-1.5 w-1.5',
+            variant === 'success' && 'bg-farm-600 animate-pulse',
+            variant === 'warning' && 'bg-amber-600',
+            variant === 'danger' && 'bg-red-600',
+            variant === 'info' && 'bg-sky-600',
+            variant === 'default' && 'bg-earth-600'
           )}
         />
       )}

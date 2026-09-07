@@ -1,8 +1,8 @@
 import { Menu, Bell, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { DemoModeBanner } from '../ui/DemoModeBanner';
-import { StatusBadge } from '../ui/StatusBadge';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '../../utils/cn';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -21,54 +21,66 @@ export function Header({ onMenuClick, farmName = 'Demo Farm', roverConnected = t
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-earth-200 bg-white/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between px-4 py-3 lg:px-6">
+    <header className="sticky top-0 z-30 border-b border-earth-300 bg-white">
+      <div className="flex items-center justify-between px-4 py-2.5 lg:px-6">
         <div className="flex items-center gap-3">
-          <button onClick={onMenuClick} className="rounded-lg p-1.5 hover:bg-earth-50 lg:hidden">
-            <Menu className="h-5 w-5 text-earth-600" />
+          <button
+            onClick={onMenuClick}
+            className="border border-earth-300 p-1.5 hover:bg-earth-100 lg:hidden"
+            aria-label="Open menu"
+          >
+            <Menu className="h-4 w-4 text-earth-800" />
           </button>
           <div>
-            <h1 className="text-sm font-bold text-farm-800 lg:text-base">
-              AgriEdge Rover
-            </h1>
-            <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-earth-400">
-              <span>
-                Farm: <span className="font-medium text-earth-600">{farmName}</span>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-sm font-bold tracking-tight text-earth-950 sm:text-base">
+                AGRIEDGE // AUTONOMOUS ROVER WORKSTATION
+              </h1>
+              <span className="hidden sm:inline-block bg-earth-200 px-1.5 py-0.2 text-[9px] font-mono font-bold tracking-widest text-earth-800">
+                PROTOTYPE
               </span>
-              <span className="hidden sm:inline">|</span>
-              <span className="flex items-center gap-1">
-                Rover:
-                <StatusBadge
-                  label={roverConnected ? 'Connected' : 'Offline'}
-                  variant={roverConnected ? 'success' : 'danger'}
-                  dot
-                />
+            </div>
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 font-mono text-[11px] text-earth-600">
+              <span>
+                SITE: <strong className="text-earth-900">{farmName.toUpperCase()}</strong>
+              </span>
+              <span className="text-earth-300">/</span>
+              <span className="flex items-center gap-1.5">
+                ROVER:
+                <span
+                  className={cn(
+                    'px-1.5 py-0.2 text-[10px] font-bold',
+                    roverConnected ? 'bg-farm-100 text-farm-800' : 'bg-red-100 text-red-800'
+                  )}
+                >
+                  {roverConnected ? 'CONNECTED' : 'OFFLINE'}
+                </span>
               </span>
               {lastSync && (
                 <>
-                  <span className="hidden md:inline">|</span>
-                  <span className="hidden md:inline">Last sync: {lastSync}</span>
+                  <span className="hidden md:inline text-earth-300">/</span>
+                  <span className="hidden md:inline text-earth-500">SYNC: {lastSync}</span>
                 </>
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <DemoModeBanner />
-          <button className="relative rounded-lg p-2 hover:bg-earth-50">
-            <Bell className="h-4 w-4 text-earth-500" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
+          <button className="relative border border-earth-300 p-1.5 hover:bg-earth-100 text-earth-700">
+            <Bell className="h-4 w-4" />
+            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 bg-clay-600 ring-2 ring-white" />
           </button>
-          <button className="rounded-lg p-2 hover:bg-earth-50">
-            <User className="h-4 w-4 text-earth-500" />
+          <button className="border border-earth-300 p-1.5 hover:bg-earth-100 text-earth-700">
+            <User className="h-4 w-4" />
           </button>
           <button
             onClick={handleLogout}
-            className="hidden rounded-lg p-2 hover:bg-earth-50 sm:block"
+            className="hidden border border-earth-300 p-1.5 hover:bg-earth-100 text-earth-700 sm:block"
             title="Logout"
           >
-            <LogOut className="h-4 w-4 text-earth-500" />
+            <LogOut className="h-4 w-4" />
           </button>
         </div>
       </div>

@@ -11,54 +11,100 @@ export function FarmMapPage() {
   const { data: zones } = useFarmZones();
   const [selectedZone, setSelectedZone] = useState<FarmZone | null>(null);
 
-  if (loading) return <LoadingState message="Loading farm map..." />;
-  if (error || !farmMap) return <ErrorState message={error || 'Failed to load'} onRetry={refetch} />;
+  if (loading) return <LoadingState message="Mapping field spatial telemetry..." />;
+  if (error || !farmMap) return <ErrorState message={error || 'Failed to load field map'} onRetry={refetch} />;
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-farm-800">Farm Map & Rover Tracking</h2>
-        <p className="mt-1 text-sm text-earth-400">
-          Autonomous rover systematically covers sampling points across the field
+      {/* Header */}
+      <div className="flex flex-col gap-1 border-b border-earth-300 pb-4">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs font-bold uppercase tracking-widest text-farm-800">
+            // CARTOGRAPHIC & ROVER TRACKING ARRAY
+          </span>
+          <span className="border border-earth-300 bg-white px-2 py-0.5 font-mono text-[10px] font-bold text-earth-700">
+            SYSTEM GRID: 4 QUADRANTS
+          </span>
+        </div>
+        <h2 className="font-display text-2xl font-bold tracking-tight text-earth-900">
+          Field Spatial Mapping & Autonomous Traverse
+        </h2>
+        <p className="font-mono text-xs text-earth-600">
+          Real-time rover coordinates, waypoint sampling progress, and sector vulnerability mapping.
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
+        {/* Tactical Map */}
         <div className="lg:col-span-2">
           <FarmMap data={farmMap} />
         </div>
 
+        {/* Rover Status & Workflow Ledger */}
         <div className="space-y-4">
-          <div className="rounded-xl border border-earth-200/60 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-farm-800">Rover Status</h3>
-            <div className="mt-4 space-y-3">
-              <InfoRow label="Status" value={farmMap.rover.state} highlight />
-              <InfoRow label="Current Location" value={`${farmMap.rover.currentZone} - Point ${farmMap.rover.currentSamplingPoint}`} />
-              <InfoRow label="Distance Covered" value={`${farmMap.rover.distanceCovered} km`} />
-              <InfoRow label="Sampling Points" value={`${farmMap.rover.completedSamplingPoints} / ${farmMap.rover.totalSamplingPoints}`} />
-              <InfoRow label="Battery" value={`${farmMap.rover.battery}%`} />
-              <InfoRow label="Obstacle Status" value={farmMap.rover.obstacleStatus} />
+          <div className="tactile-card bg-white p-5">
+            <div className="border-b border-earth-200 pb-3 mb-3">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+                // ACTIVE HARDWARE TELEMETRY
+              </span>
+              <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
+                Rover Status Readout
+              </h3>
+            </div>
+            <div className="space-y-2.5 font-mono text-xs">
+              <InfoRow label="OPERATIONAL STATE" value={farmMap.rover.state} highlight />
+              <InfoRow label="ACTIVE POSITION" value={`${farmMap.rover.currentZone} // PT #${farmMap.rover.currentSamplingPoint}`} />
+              <InfoRow label="DISTANCE COVERED" value={`${farmMap.rover.distanceCovered} km`} />
+              <InfoRow label="WAYPOINTS PROBED" value={`${farmMap.rover.completedSamplingPoints} / ${farmMap.rover.totalSamplingPoints}`} />
+              <InfoRow label="BATTERY CAPACITY" value={`${farmMap.rover.battery}%`} />
+              <InfoRow label="OBSTACLE STATUS" value={farmMap.rover.obstacleStatus} />
             </div>
           </div>
 
-          <div className="rounded-xl border border-earth-200/60 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-farm-800">Rover Workflow</h3>
-            <ol className="mt-3 space-y-2 text-xs text-earth-600">
-              <li className="flex gap-2"><span className="font-bold text-farm-600">1.</span> Move to sampling location</li>
-              <li className="flex gap-2"><span className="font-bold text-farm-600">2.</span> Position soil sensors</li>
-              <li className="flex gap-2"><span className="font-bold text-farm-600">3.</span> Collect soil measurements</li>
-              <li className="flex gap-2"><span className="font-bold text-farm-600">4.</span> Capture crop images</li>
-              <li className="flex gap-2"><span className="font-bold text-farm-600">5.</span> Process via Edge AI</li>
-              <li className="flex gap-2"><span className="font-bold text-farm-600">6.</span> Assign zone & generate recommendations</li>
-              <li className="flex gap-2"><span className="font-bold text-farm-600">7.</span> Move to next point</li>
+          <div className="tactile-card bg-white p-5">
+            <div className="border-b border-earth-200 pb-3 mb-3">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+                // SAMPLING PROTOCOL
+              </span>
+              <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
+                Traverse Execution Cycle
+              </h3>
+            </div>
+            <ol className="space-y-1.5 font-mono text-xs text-earth-700">
+              <li className="flex gap-2">
+                <span className="font-bold text-farm-800">01.</span> Autonomous GPS waypoint navigation
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-farm-800">02.</span> Actuate sub-surface sensor probe (10cm/20cm)
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-farm-800">03.</span> Capture soil moisture, temp, pH & NPK
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-farm-800">04.</span> Optical foliage frame capture (224×224)
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-farm-800">05.</span> On-device MobileNetV3 Edge inference
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-farm-800">06.</span> Broadcast telemetry & proceed to next point
+              </li>
             </ol>
           </div>
         </div>
       </div>
 
-      {/* Farm Zones */}
+      {/* Farm Quadrants */}
       <div>
-        <h3 className="mb-4 text-sm font-semibold text-farm-800">Farm Zones</h3>
+        <div className="border-b border-earth-300 pb-3 mb-4">
+          <span className="font-mono text-xs font-bold uppercase tracking-widest text-farm-800">
+            // SECTOR SPECIFICATIONS
+          </span>
+          <h3 className="font-display text-base font-bold uppercase tracking-tight text-earth-900">
+            Field Quadrants & Spatial Analysis
+          </h3>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {zones?.map((zone) => (
             <ZoneCard
@@ -69,6 +115,7 @@ export function FarmMapPage() {
             />
           ))}
         </div>
+
         {selectedZone && (
           <div className="mt-4">
             <ZoneDetail zone={selectedZone} />
@@ -81,9 +128,11 @@ export function FarmMapPage() {
 
 function InfoRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-earth-400">{label}</span>
-      <span className={highlight ? 'font-semibold text-farm-600' : 'font-medium text-farm-800'}>{value}</span>
+    <div className="flex items-center justify-between border-b border-earth-200 pb-1.5 last:border-0 last:pb-0">
+      <span className="text-earth-500">{label}</span>
+      <span className={highlight ? 'font-bold text-farm-800' : 'font-bold text-earth-900'}>
+        {value}
+      </span>
     </div>
   );
 }

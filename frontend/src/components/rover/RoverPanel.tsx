@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import type { RoverStatus } from '../../types';
 import { StatusBadge } from '../ui/StatusBadge';
-import { roverStateColor } from '../../utils/format';
 import { cn } from '../../utils/cn';
 import {
   Battery,
@@ -17,18 +16,27 @@ interface RoverStatusPanelProps {
 }
 
 export function RoverStatusPanel({ rover }: RoverStatusPanelProps) {
-  const stateVariant = rover.state === 'ACTIVE' ? 'success' : rover.state === 'OFFLINE' || rover.state === 'EMERGENCY_STOP' ? 'danger' : 'warning';
+  const stateVariant =
+    rover.state === 'ACTIVE'
+      ? 'success'
+      : rover.state === 'OFFLINE' || rover.state === 'EMERGENCY_STOP'
+      ? 'danger'
+      : 'warning';
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Stat icon={Navigation} label="Rover Status" value={rover.state} variant={stateVariant} />
-      <Stat icon={Battery} label="Battery" value={`${rover.battery}%`} />
-      <Stat icon={MapPin} label="Current Zone" value={rover.currentZone} />
-      <Stat icon={Target} label="Sampling Point" value={`${rover.currentSamplingPoint}`} />
-      <Stat icon={Navigation} label="Distance Covered" value={`${rover.distanceCovered} km`} />
-      <Stat icon={Target} label="Sampling Points" value={`${rover.completedSamplingPoints}/${rover.totalSamplingPoints}`} />
-      <Stat icon={Shield} label="Obstacle Status" value={rover.obstacleStatus} />
-      <Stat icon={Radio} label="Connection" value={rover.connection} />
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <Stat icon={Navigation} label="ROVER STATE" value={rover.state} variant={stateVariant} />
+      <Stat icon={Battery} label="BATTERY LEVEL" value={`${rover.battery}%`} />
+      <Stat icon={MapPin} label="OPERATING ZONE" value={rover.currentZone} />
+      <Stat icon={Target} label="TARGET SAMPLING PT" value={`#${rover.currentSamplingPoint}`} />
+      <Stat icon={Navigation} label="DISTANCE TRAVERSED" value={`${rover.distanceCovered} km`} />
+      <Stat
+        icon={Target}
+        label="WAYPOINT COMPLETION"
+        value={`${rover.completedSamplingPoints}/${rover.totalSamplingPoints}`}
+      />
+      <Stat icon={Shield} label="COLLISION SENSOR" value={rover.obstacleStatus} />
+      <Stat icon={Radio} label="TELEMETRY LINK" value={rover.connection} />
     </div>
   );
 }
@@ -45,18 +53,20 @@ function Stat({
   variant?: 'success' | 'warning' | 'danger';
 }) {
   return (
-    <div className="rounded-xl border border-earth-200/60 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-farm-500" />
-        <span className="text-xs text-earth-400">{label}</span>
+    <div className="tactile-card bg-white p-4">
+      <div className="flex items-center justify-between border-b border-earth-200 pb-2">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-earth-500">
+          {label}
+        </span>
+        <Icon className="h-3.5 w-3.5 text-earth-400" />
       </div>
-      {variant ? (
-        <div className="mt-2">
+      <div className="mt-2.5">
+        {variant ? (
           <StatusBadge label={value} variant={variant} dot />
-        </div>
-      ) : (
-        <p className={cn('mt-2 text-lg font-semibold text-farm-800')}>{value}</p>
-      )}
+        ) : (
+          <p className="font-mono text-base font-bold text-earth-900">{value}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -81,33 +91,49 @@ export function RoverControls({ rover, actionLoading, onAction }: RoverControlsP
   ];
 
   return (
-    <div className="rounded-xl border border-earth-200/60 bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-farm-800">Rover Controls</h3>
-      <p className="mt-1 text-xs text-earth-400">
-        Simulated controls — will connect to FastAPI rover endpoints
-      </p>
-      <div className="mt-4 flex flex-wrap gap-3">
+    <div className="tactile-card bg-white p-5">
+      <div className="flex items-center justify-between border-b border-earth-200 pb-3 mb-4">
+        <div>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+            // OPERATOR ACTUATOR CONSOLE
+          </span>
+          <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
+            Hardware Actuation & Mission Directives
+          </h3>
+        </div>
+        {rover && (
+          <span className="border border-earth-300 bg-earth-100 px-2.5 py-0.5 font-mono text-[11px] font-bold text-earth-800">
+            STATE: {rover.state}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2.5">
         {buttons.map((btn) => (
           <button
             key={btn.action}
             disabled={btn.disabled || actionLoading === btn.action}
             onClick={() => onAction(btn.action)}
             className={cn(
-              'rounded-lg px-4 py-2.5 text-xs font-semibold tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-40',
-              btn.variant === 'primary' && 'bg-farm-600 text-white hover:bg-farm-700',
-              btn.variant === 'secondary' && 'border border-earth-300 bg-white text-farm-700 hover:bg-farm-50',
-              btn.variant === 'danger' && 'bg-red-600 text-white hover:bg-red-700'
+              'border px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all disabled:cursor-not-allowed disabled:opacity-30',
+              btn.variant === 'primary' &&
+                'border-farm-900 bg-farm-800 text-white hover:bg-farm-900 active:translate-y-0.5 shadow-xs',
+              btn.variant === 'secondary' &&
+                'border-earth-300 bg-earth-100 text-earth-900 hover:bg-earth-200/80 active:translate-y-0.5',
+              btn.variant === 'danger' &&
+                'border-red-800 bg-red-700 text-white hover:bg-red-800 active:translate-y-0.5 shadow-xs'
             )}
           >
-            {actionLoading === btn.action ? 'Processing...' : btn.label}
+            {actionLoading === btn.action ? 'TRANSMITTING...' : btn.label}
           </button>
         ))}
       </div>
-      {rover && (
-        <p className={cn('mt-3 text-xs font-medium', roverStateColor(rover.state))}>
-          Current state: {rover.state}
+
+      <div className="mt-4 border-t border-earth-200 pt-3">
+        <p className="font-mono text-[11px] text-earth-500">
+          COMMAND PROTOCOL: 868MHz LoRa Transceiver via Serial Gateway (FastAPI /api/rover/action)
         </p>
-      )}
+      </div>
     </div>
   );
 }

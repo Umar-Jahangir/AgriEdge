@@ -11,60 +11,122 @@ export function FarmMap({ data, className, compact }: FarmMapProps) {
   const { samplingPoints, rover, attentionAreas } = data;
 
   return (
-    <div className={cn('rounded-xl border border-earth-200/60 bg-white shadow-sm', className)}>
-      <div className="border-b border-earth-100 px-5 py-3">
-        <h3 className="text-sm font-semibold text-farm-800">Farm Field</h3>
-        <p className="text-xs text-earth-400">Rover sampling coverage map</p>
+    <div className={cn('tactile-card p-5 bg-white', className)}>
+      <div className="flex items-center justify-between border-b border-earth-200 pb-3 mb-4">
+        <div>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+            // FIELD COORDINATE GRID
+          </span>
+          <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
+            Autonomous Rover Sampling Array
+          </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 border border-farm-300 bg-farm-50 px-2 py-0.5 font-mono text-[10px] font-bold text-farm-800">
+            <span className="h-1.5 w-1.5 rounded-full bg-farm-600 animate-ping" />
+            GRID 100m²
+          </span>
+          <span className="font-mono text-[11px] font-semibold text-earth-600">
+            ROV-01: {rover.currentZone}
+          </span>
+        </div>
       </div>
 
-      <div className="p-4">
+      <div>
         <div
           className={cn(
-            'relative rounded-lg border-2 border-dashed border-earth-200 bg-gradient-to-br from-farm-50 to-earth-50',
-            compact ? 'h-48' : 'h-72'
+            'relative border-2 border-earth-300 bg-earth-100/50 overflow-hidden select-none',
+            compact ? 'h-52' : 'h-80'
           )}
         >
-          {/* Zone labels */}
-          <div className="absolute left-2 top-2 text-[10px] font-medium text-earth-400">Zone A</div>
-          <div className="absolute right-2 top-2 text-[10px] font-medium text-earth-400">Zone B</div>
-          <div className="absolute bottom-2 left-2 text-[10px] font-medium text-earth-400">Zone C</div>
-          <div className="absolute bottom-2 right-2 text-[10px] font-medium text-earth-400">Zone D</div>
+          {/* Subtle grid background pattern */}
+          <div
+            className="absolute inset-0 opacity-40"
+            style={{
+              backgroundImage:
+                'linear-gradient(to right, #d5cebf 1px, transparent 1px), linear-gradient(to bottom, #d5cebf 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          />
 
-          {/* Grid lines */}
-          <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-            <div className="border-r border-b border-earth-200/40" />
-            <div className="border-b border-earth-200/40" />
-            <div className="border-r border-earth-200/40" />
-            <div />
+          {/* Sector Crosshair Dividers */}
+          <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
+            <div className="border-r-2 border-b-2 border-dashed border-earth-300/80 relative">
+              <span className="absolute left-2.5 top-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
+                [SECTOR A // NW]
+              </span>
+            </div>
+            <div className="border-b-2 border-dashed border-earth-300/80 relative">
+              <span className="absolute right-2.5 top-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
+                [SECTOR B // NE]
+              </span>
+            </div>
+            <div className="border-r-2 border-dashed border-earth-300/80 relative">
+              <span className="absolute left-2.5 bottom-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
+                [SECTOR C // SW]
+              </span>
+            </div>
+            <div className="relative">
+              <span className="absolute right-2.5 bottom-2 font-mono text-[10px] font-bold tracking-wider text-earth-600">
+                [SECTOR D // SE]
+              </span>
+            </div>
           </div>
+
+          {/* Center Coordinates Reticle */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-earth-400">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="6" />
+              <line x1="12" y1="2" x2="12" y2="7" />
+              <line x1="12" y1="17" x2="12" y2="22" />
+              <line x1="2" y1="12" x2="7" y2="12" />
+              <line x1="17" y1="12" x2="22" y2="12" />
+            </svg>
+          </div>
+
+          {/* Attention areas */}
+          {attentionAreas.map((area, i) => (
+            <div
+              key={i}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ left: `${area.x}%`, top: `${area.y}%` }}
+            >
+              <div className="relative flex items-center justify-center">
+                <span className="absolute h-10 w-10 border border-amber-500/60 bg-amber-500/10 animate-pulse" />
+                <span className="border border-amber-600 bg-amber-500 px-1 py-0.5 font-mono text-[9px] font-bold text-white shadow-sm">
+                  ATTN
+                </span>
+              </div>
+            </div>
+          ))}
 
           {/* Sampling points */}
           {samplingPoints.map((point) => (
             <div
               key={point.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
+              className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-125 z-10"
               style={{ left: `${point.x}%`, top: `${point.y}%` }}
               title={`Point ${point.pointNumber} — ${point.status}`}
             >
               {point.status === 'completed' && (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-farm-500 text-[8px] text-white">
+                <span className="flex h-4 w-4 items-center justify-center border border-farm-700 bg-farm-600 text-[8px] font-bold text-white shadow-xs">
                   ✓
                 </span>
               )}
               {point.status === 'current' && (
                 <span className="relative flex h-5 w-5 items-center justify-center">
-                  <span className="absolute h-5 w-5 animate-ping rounded-full bg-farm-400 opacity-40" />
-                  <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-farm-600 text-[10px] text-white">
-                    ●
+                  <span className="absolute h-5 w-5 border border-farm-600 bg-farm-500/30 animate-ping" />
+                  <span className="relative flex h-4 w-4 items-center justify-center border border-farm-900 bg-farm-800 text-[9px] font-mono font-bold text-white">
+                    {point.pointNumber}
                   </span>
                 </span>
               )}
               {point.status === 'pending' && (
-                <span className="flex h-3 w-3 items-center justify-center rounded-full border-2 border-earth-300 bg-white" />
+                <span className="flex h-3 w-3 items-center justify-center border border-earth-400 bg-white" />
               )}
               {point.status === 'attention' && (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[8px] text-white">
-                  ⚠
+                <span className="flex h-4 w-4 items-center justify-center border border-amber-700 bg-amber-500 text-[8px] font-bold text-white">
+                  !
                 </span>
               )}
             </div>
@@ -72,43 +134,45 @@ export function FarmMap({ data, className, compact }: FarmMapProps) {
 
           {/* Rover position */}
           <div
-            className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-1000"
+            className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-1000 z-20"
             style={{ left: `${rover.position.x}%`, top: `${rover.position.y}%` }}
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-farm-700 text-sm shadow-lg">
-              🚜
-            </div>
-          </div>
-
-          {/* Attention areas */}
-          {attentionAreas.map((area, i) => (
-            <div
-              key={i}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${area.x}%`, top: `${area.y}%` }}
-            >
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs ring-2 ring-amber-300">
-                ⚠
+            <div className="relative flex flex-col items-center">
+              <div className="flex h-7 w-7 items-center justify-center border-2 border-earth-900 bg-farm-900 text-white shadow-md">
+                <svg className="h-4 w-4 fill-current text-white" viewBox="0 0 24 24">
+                  <path d="M4 15h16v2H4zm2-7h12l-2 5H8zm-3 9a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+                </svg>
+              </div>
+              <span className="mt-0.5 border border-earth-800 bg-earth-900 px-1 py-0.2 font-mono text-[8px] font-bold text-white uppercase tracking-tight">
+                ROV-01
               </span>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Legend */}
-        <div className="mt-3 flex flex-wrap gap-4 text-[10px] text-earth-500">
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-farm-500" /> Completed
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-farm-600 ring-2 ring-farm-300" /> Current
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full border-2 border-earth-300 bg-white" /> Pending
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Attention
-          </span>
-          <span className="flex items-center gap-1">🚜 Rover</span>
+        {/* Tactical Legend */}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-earth-200 pt-3 text-[11px] font-mono text-earth-700">
+          <div className="flex flex-wrap gap-4">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 border border-farm-700 bg-farm-600" />
+              <span className="font-medium">COMPLETED</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 border border-farm-900 bg-farm-800" />
+              <span className="font-medium">CURRENT</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 border border-earth-400 bg-white" />
+              <span className="font-medium">PENDING</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 border border-amber-700 bg-amber-500" />
+              <span className="font-medium">ATTENTION</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-earth-500">
+            <span>COORDINATES: LAT 18.5204° N, LONG 73.8567° E</span>
+          </div>
         </div>
       </div>
     </div>

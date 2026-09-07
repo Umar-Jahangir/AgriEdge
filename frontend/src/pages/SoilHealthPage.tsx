@@ -8,16 +8,16 @@ import { useSoilAnalysis, useLatestSensors, useSensorHistory } from '../hooks/us
 import type { NutrientStatus } from '../types';
 
 const timeOptions = [
-  { value: 'today', label: 'Today' },
-  { value: '7d', label: '7 Days' },
-  { value: '30d', label: '30 Days' },
+  { value: 'today', label: 'TODAY' },
+  { value: '7d', label: '7 DAYS' },
+  { value: '30d', label: '30 DAYS' },
 ];
 
-const statusColors: Record<NutrientStatus, string> = {
-  Good: 'text-farm-600',
-  Moderate: 'text-amber-600',
-  Low: 'text-orange-600',
-  Deficient: 'text-red-600',
+const statusStyles: Record<NutrientStatus, { text: string; bg: string; border: string }> = {
+  Good: { text: 'text-farm-800', bg: 'bg-farm-100', border: 'border-farm-400' },
+  Moderate: { text: 'text-amber-800', bg: 'bg-amber-100', border: 'border-amber-400' },
+  Low: { text: 'text-orange-800', bg: 'bg-orange-100', border: 'border-orange-400' },
+  Deficient: { text: 'text-red-700', bg: 'bg-red-100', border: 'border-red-400' },
 };
 
 export function SoilHealthPage() {
@@ -26,106 +26,165 @@ export function SoilHealthPage() {
   const { data: sensors, loading: sensorLoading } = useLatestSensors();
   const { data: history, loading: historyLoading } = useSensorHistory(range);
 
-  if (analysisLoading || sensorLoading) return <LoadingState message="Loading soil health data..." />;
+  if (analysisLoading || sensorLoading) return <LoadingState message="Querying subterranean sensor bus..." />;
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-farm-800">Soil Health</h2>
-        <p className="mt-1 text-sm text-earth-400">
-          Detailed sensor readings from rover soil probes at sampling points
-        </p>
+      {/* Header */}
+      <div className="flex flex-col gap-1 border-b border-earth-300 pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-farm-800">
+              // SUBTERRANEAN SENSOR ARRAY
+            </span>
+            <span className="border border-earth-300 bg-white px-2 py-0.5 font-mono text-[10px] font-bold text-earth-700">
+              CALIBRATED ESP32 SENSORS
+            </span>
+          </div>
+          <h2 className="font-display text-2xl font-bold tracking-tight text-earth-900">
+            Soil Chemistry & Moisture Profile
+          </h2>
+          <p className="font-mono text-xs text-earth-600">
+            In-situ subterranean probe measurements captured during rover waypoint stops.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <TimeRangeSelector options={timeOptions} value={range} onChange={(v) => setRange(v as typeof range)} />
+        </div>
       </div>
 
-      {/* Current Readings */}
+      {/* Primary Telemetry Ribbons */}
       {sensors && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <ReadingCard label="Soil Moisture" value={`${sensors.soilMoisture}%`} />
-          <ReadingCard label="Soil Temperature" value={`${sensors.soilTemperature}°C`} />
-          <ReadingCard label="Soil pH" value={String(sensors.soilPh)} />
-          <ReadingCard label="Electrical Conductivity" value={`${sensors.electricalConductivity} mS/cm`} />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ReadingCard
+            label="SOIL VOLUMETRIC MOISTURE"
+            value={`${sensors.soilMoisture}%`}
+            status={sensors.soilMoisture < 35 ? 'DRY' : 'OPTIMAL'}
+            statusColor={sensors.soilMoisture < 35 ? 'text-amber-700' : 'text-farm-800'}
+          />
+          <ReadingCard
+            label="PROBE TEMPERATURE"
+            value={`${sensors.soilTemperature}°C`}
+            status="NOMINAL"
+            statusColor="text-farm-800"
+          />
+          <ReadingCard
+            label="HYDROGEN POTENTIAL (pH)"
+            value={String(sensors.soilPh)}
+            status={sensors.soilPh >= 6.0 && sensors.soilPh <= 7.0 ? 'NEUTRAL' : 'SLIGHTLY ACIDIC'}
+            statusColor="text-farm-800"
+          />
+          <ReadingCard
+            label="ELECTRICAL CONDUCTIVITY"
+            value={`${sensors.electricalConductivity} mS/cm`}
+            status="STABLE SALINITY"
+            statusColor="text-farm-800"
+          />
         </div>
       )}
 
-      {/* Soil Condition Analysis */}
+      {/* AI Soil Condition Index Slab */}
       {analysis && (
-        <div className="rounded-xl border border-earth-200/60 bg-white p-6 shadow-sm">
-          <h3 className="text-sm font-semibold text-farm-800">Soil Condition Analysis</h3>
-          <p className="mt-1 text-xs text-earth-400">{analysis.derivedFrom}</p>
-          <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-center">
-            <div className="text-center">
-              <p className="text-4xl font-bold text-farm-700">{analysis.overallScore}</p>
-              <p className="text-sm text-earth-400">/100</p>
-              <p className="mt-1 text-xs font-medium text-farm-600">AI Soil Condition Score</p>
+        <div className="tactile-card bg-white p-5">
+          <div className="flex items-center justify-between border-b border-earth-200 pb-3 mb-4">
+            <div>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+                // COMPOSITE INDEX ANALYSIS
+              </span>
+              <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
+                AI Subterranean Condition Assessment
+              </h3>
             </div>
-            <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-5">
-              <AnalysisItem label="Moisture" status={analysis.moisture} />
-              <AnalysisItem label="pH" status={analysis.ph} />
-              <AnalysisItem label="NPK" status={analysis.npk} />
-              <AnalysisItem label="EC" status={analysis.ec} />
-              <AnalysisItem label="Temperature" status={analysis.temperature} />
+            <span className="font-mono text-[11px] text-earth-500">
+              DERIVED FROM: {analysis.derivedFrom.toUpperCase()}
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+            {/* Big Hero Rating */}
+            <div className="flex items-baseline gap-3 border-b border-earth-200 pb-4 lg:border-b-0 lg:border-r lg:pr-8 lg:pb-0">
+              <span className="font-mono text-5xl font-bold tracking-tighter text-farm-900">
+                {analysis.overallScore}
+              </span>
+              <div>
+                <span className="font-mono text-xs text-earth-500">/ 100 PTS</span>
+                <p className="font-display text-xs font-bold uppercase tracking-wider text-farm-800">
+                  HEALTH SCORE
+                </p>
+              </div>
+            </div>
+
+            {/* Component Status Tiles */}
+            <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-5 font-mono">
+              <AnalysisItem label="MOISTURE" status={analysis.moisture} />
+              <AnalysisItem label="pH LEVEL" status={analysis.ph} />
+              <AnalysisItem label="NPK BALANCE" status={analysis.npk} />
+              <AnalysisItem label="SALINITY (EC)" status={analysis.ec} />
+              <AnalysisItem label="TEMPERATURE" status={analysis.temperature} />
             </div>
           </div>
         </div>
       )}
 
-      {/* Time Range */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-farm-800">Historical Trends</h3>
-        <TimeRangeSelector options={timeOptions} value={range} onChange={(v) => setRange(v as typeof range)} />
-      </div>
-
+      {/* Historical Telemetry Charts */}
       {historyLoading ? (
-        <LoadingState message="Loading charts..." />
+        <LoadingState message="Compiling historical sensor telemetry..." />
       ) : !history ? (
-        <ErrorState message="Failed to load history" />
+        <ErrorState message="Failed to load telemetry history" />
       ) : (
         <>
           <div className="grid gap-4 lg:grid-cols-2">
-            <ChartCard title="Soil Moisture" subtitle="Over time">
-              <TrendAreaChart data={history.soilMoisture} color="#3d9140" unit="%" />
+            <ChartCard title="Soil Moisture Saturation" subtitle="Volumetric water content percentage">
+              <TrendAreaChart data={history.soilMoisture} color="#1b6d33" unit="%" />
             </ChartCard>
-            <ChartCard title="Soil Temperature" subtitle="Over time">
+            <ChartCard title="Soil Temperature Profile" subtitle="Sub-surface thermal measurements in Celsius">
               <TrendAreaChart data={history.soilTemperature} color="#d97706" unit="°C" />
             </ChartCard>
-            <ChartCard title="pH Level" subtitle="Over time">
+            <ChartCard title="Hydrogen Ion Activity (pH)" subtitle="Chemical acidity / alkalinity balance">
               <TrendAreaChart data={history.ph} color="#2563eb" />
             </ChartCard>
-            <ChartCard title="Electrical Conductivity" subtitle="Over time">
+            <ChartCard title="Electrical Conductivity (EC)" subtitle="Soil salinity concentration index">
               <TrendAreaChart data={history.ec} color="#7c3aed" unit=" mS/cm" />
             </ChartCard>
           </div>
 
+          {/* NPK Breakdown Section */}
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-earth-200/60 bg-white p-6 shadow-sm">
-              <h3 className="text-sm font-semibold text-farm-800">NPK Analysis</h3>
-              <div className="mt-4">
-                {sensors && (
-                  <NPKGauges
-                    npk={{
-                      nitrogen: sensors.nitrogen,
-                      phosphorus: sensors.phosphorus,
-                      potassium: sensors.potassium,
-                      nitrogenStatus: sensors.nitrogen < 50 ? 'Moderate' : 'Good',
-                      phosphorusStatus: sensors.phosphorus < 30 ? 'Moderate' : 'Good',
-                      potassiumStatus: 'Good',
-                      timestamp: sensors.timestamp,
-                    }}
-                    showInterpretation
-                  />
-                )}
+            <div className="tactile-card bg-white p-5">
+              <div className="border-b border-earth-200 pb-3 mb-4">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+                  // MACRONUTRIENT BALANCE
+                </span>
+                <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
+                  NPK Chemical Composition
+                </h3>
               </div>
+              {sensors && (
+                <NPKGauges
+                  npk={{
+                    nitrogen: sensors.nitrogen,
+                    phosphorus: sensors.phosphorus,
+                    potassium: sensors.potassium,
+                    nitrogenStatus: sensors.nitrogen < 50 ? 'Moderate' : 'Good',
+                    phosphorusStatus: sensors.phosphorus < 30 ? 'Moderate' : 'Good',
+                    potassiumStatus: 'Good',
+                    timestamp: sensors.timestamp,
+                  }}
+                  showInterpretation
+                />
+              )}
             </div>
 
             <div className="space-y-4">
-              <ChartCard title="Nitrogen Trend" subtitle="ppm">
-                <TrendAreaChart data={history.nitrogen} color="#16a34a" unit=" ppm" />
+              <ChartCard title="Nitrogen (N) Trajectory" subtitle="Concentration in parts per million (ppm)">
+                <TrendAreaChart data={history.nitrogen} color="#1b6d33" unit=" ppm" />
               </ChartCard>
-              <ChartCard title="Phosphorus Trend" subtitle="ppm">
+              <ChartCard title="Phosphorus (P) Trajectory" subtitle="Available orthophosphate in ppm">
                 <TrendAreaChart data={history.phosphorus} color="#ca8a04" unit=" ppm" />
               </ChartCard>
-              <ChartCard title="Potassium Trend" subtitle="ppm">
-                <TrendAreaChart data={history.potassium} color="#dc2626" unit=" ppm" />
+              <ChartCard title="Potassium (K) Trajectory" subtitle="Exchangeable potassium in ppm">
+                <TrendAreaChart data={history.potassium} color="#b91c1c" unit=" ppm" />
               </ChartCard>
             </div>
           </div>
@@ -135,20 +194,39 @@ export function SoilHealthPage() {
   );
 }
 
-function ReadingCard({ label, value }: { label: string; value: string }) {
+function ReadingCard({
+  label,
+  value,
+  status,
+  statusColor,
+}: {
+  label: string;
+  value: string;
+  status: string;
+  statusColor: string;
+}) {
   return (
-    <div className="rounded-xl border border-earth-200/60 bg-white p-4 shadow-sm">
-      <p className="text-xs text-earth-400">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-farm-800">{value}</p>
+    <div className="tactile-card bg-white p-4">
+      <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-earth-500">
+        {label}
+      </span>
+      <p className="mt-1 font-mono text-xl font-bold tracking-tight text-earth-900">{value}</p>
+      <div className="mt-2 flex items-center justify-between border-t border-earth-200 pt-2 font-mono text-[10px]">
+        <span className="text-earth-400">STATE:</span>
+        <span className={statusColor}>{status}</span>
+      </div>
     </div>
   );
 }
 
 function AnalysisItem({ label, status }: { label: string; status: NutrientStatus }) {
+  const style = statusStyles[status] || statusStyles['Good'];
   return (
-    <div className="rounded-lg bg-farm-50/50 p-3 text-center">
-      <p className="text-xs text-earth-400">{label}</p>
-      <p className={`mt-1 text-sm font-semibold ${statusColors[status]}`}>{status}</p>
+    <div className={`border p-2.5 ${style.border} ${style.bg}`}>
+      <span className="text-[10px] uppercase text-earth-600">{label}</span>
+      <p className={`mt-0.5 text-xs font-bold uppercase tracking-wide ${style.text}`}>
+        {status}
+      </p>
     </div>
   );
 }

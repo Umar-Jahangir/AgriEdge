@@ -17,7 +17,7 @@ export function KPICard({
   value,
   subtitle,
   status,
-  statusColor = 'text-farm-600',
+  statusColor = 'text-farm-700',
   icon: Icon,
   className,
   children,
@@ -25,22 +25,33 @@ export function KPICard({
   return (
     <div
       className={cn(
-        'rounded-xl border border-earth-200/60 bg-white p-5 shadow-sm transition-shadow hover:shadow-md',
+        'relative bg-white border border-earth-300 p-4 transition-colors hover:border-earth-500',
         className
       )}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-earth-500">{title}</p>
-          <p className="mt-1 text-2xl font-semibold text-farm-800">{value}</p>
-          {subtitle && <p className="mt-0.5 text-xs text-earth-400">{subtitle}</p>}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-earth-500">
+            <span>//</span>
+            <span className="truncate">{title}</span>
+          </div>
+          <p className="mt-2 font-mono text-2xl font-bold tracking-tight text-earth-950 sm:text-3xl">
+            {value}
+          </p>
+          {subtitle && (
+            <p className="mt-1 font-mono text-[11px] text-earth-500 truncate">{subtitle}</p>
+          )}
           {status && (
-            <p className={cn('mt-2 text-xs font-medium', statusColor)}>{status}</p>
+            <div className="mt-2.5 inline-block">
+              <span className={cn('px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider border border-current', statusColor)}>
+                {status}
+              </span>
+            </div>
           )}
         </div>
         {Icon && (
-          <div className="rounded-lg bg-farm-50 p-2.5">
-            <Icon className="h-5 w-5 text-farm-600" />
+          <div className="border border-earth-200 bg-earth-50 p-2 text-earth-700 shrink-0">
+            <Icon className="h-4 w-4" />
           </div>
         )}
       </div>

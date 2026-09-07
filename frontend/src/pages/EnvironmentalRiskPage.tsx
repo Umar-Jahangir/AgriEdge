@@ -8,9 +8,9 @@ import { useEnvironmentalRisk, useSensorHistory } from '../hooks/useData';
 import { CloudOff, Thermometer, Droplets, Wind } from 'lucide-react';
 
 const timeOptions = [
-  { value: 'today', label: 'Today' },
-  { value: '7d', label: '7 Days' },
-  { value: '30d', label: '30 Days' },
+  { value: 'today', label: 'TODAY' },
+  { value: '7d', label: '7 DAYS' },
+  { value: '30d', label: '30 DAYS' },
 ];
 
 export function EnvironmentalRiskPage() {
@@ -18,74 +18,100 @@ export function EnvironmentalRiskPage() {
   const { data: risk, loading, error, refetch } = useEnvironmentalRisk();
   const { data: history, loading: historyLoading } = useSensorHistory(range);
 
-  if (loading) return <LoadingState message="Loading environmental data..." />;
-  if (error || !risk) return <ErrorState message={error || 'Failed to load'} onRetry={refetch} />;
+  if (loading) return <LoadingState message="Polling atmospheric telemetry..." />;
+  if (error || !risk) return <ErrorState message={error || 'Failed to load telemetry'} onRetry={refetch} />;
 
   const risks = [
-    { label: 'Drought Risk', value: risk.droughtRisk },
-    { label: 'Flood Risk', value: risk.floodRisk },
-    { label: 'Heat Stress Risk', value: risk.heatStressRisk },
-    { label: 'Crop Disease Risk', value: risk.cropDiseaseRisk },
-    { label: 'Water Stress Risk', value: risk.waterStressRisk },
+    { label: 'DROUGHT RISK', value: risk.droughtRisk },
+    { label: 'FLOOD / RUNOFF RISK', value: risk.floodRisk },
+    { label: 'HEAT STRESS RISK', value: risk.heatStressRisk },
+    { label: 'FUNGAL / DISEASE RISK', value: risk.cropDiseaseRisk },
+    { label: 'HYDRATION STRESS RISK', value: risk.waterStressRisk },
   ];
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-farm-800">Environmental Risk Monitoring</h2>
-        <p className="mt-1 text-sm text-earth-400">
-          Air and soil environmental conditions from rover-mounted sensors
-        </p>
+      {/* Header */}
+      <div className="flex flex-col gap-1 border-b border-earth-300 pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-farm-800">
+              // CLIMATOLOGICAL & EDAPHIC SURVEILLANCE
+            </span>
+            <span className="border border-earth-300 bg-white px-2 py-0.5 font-mono text-[10px] font-bold text-earth-700">
+              ROVER MICROCLIMATE POD
+            </span>
+          </div>
+          <h2 className="font-display text-2xl font-bold tracking-tight text-earth-900">
+            Environmental Stress & Microclimate Monitoring
+          </h2>
+          <p className="font-mono text-xs text-earth-600">
+            Real-time ambient and subterranean sensor readings correlating weather patterns with crop vulnerability.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <TimeRangeSelector options={timeOptions} value={range} onChange={(v) => setRange(v as typeof range)} />
+        </div>
       </div>
 
-      {/* Current Readings */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <EnvCard icon={Thermometer} label="Air Temperature" value={`${risk.airTemperature}°C`} />
-        <EnvCard icon={Wind} label="Humidity" value={`${risk.humidity}%`} />
-        <EnvCard icon={Thermometer} label="Soil Temperature" value={`${risk.soilTemperature}°C`} />
-        <EnvCard icon={Droplets} label="Soil Moisture" value={`${risk.soilMoisture}%`} />
+      {/* Current Readings Telemetry Ribbon */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <EnvCard icon={Thermometer} label="AMBIENT AIR TEMPERATURE" value={`${risk.airTemperature}°C`} />
+        <EnvCard icon={Wind} label="RELATIVE HUMIDITY" value={`${risk.humidity}%`} />
+        <EnvCard icon={Thermometer} label="SUBTERRANEAN TEMP" value={`${risk.soilTemperature}°C`} />
+        <EnvCard icon={Droplets} label="SOIL MOISTURE SATURATION" value={`${risk.soilMoisture}%`} />
       </div>
 
-      {/* Weather Integration Pending */}
+      {/* Technical Integration Notice */}
       {risk.weatherIntegrationPending && (
-        <div className="flex items-center gap-3 rounded-xl border border-earth-200 bg-earth-50/50 p-4">
-          <CloudOff className="h-5 w-5 text-earth-400" />
-          <div>
-            <p className="text-sm font-medium text-earth-600">External Weather Data — Integration Pending</p>
-            <p className="text-xs text-earth-400">
-              Rainfall and weather conditions require external API integration. The rover does not measure rainfall directly.
+        <div className="tactile-card bg-earth-100/60 p-4 flex items-start gap-3 border-earth-300">
+          <CloudOff className="h-5 w-5 text-earth-500 shrink-0 mt-0.5" />
+          <div className="font-mono text-xs">
+            <p className="font-bold uppercase tracking-wider text-earth-900">
+              [TELEMETRY NOTE] EXTERNAL SATELLITE WEATHER FEED — STANDBY
+            </p>
+            <p className="mt-1 text-[11px] text-earth-600">
+              Precipitation forecasts and macro-meteorological data require external weather radar API. Currently utilizing in-situ rover microclimate telemetry.
             </p>
           </div>
         </div>
       )}
 
-      {/* Risk Indicators */}
-      <div className="rounded-xl border border-earth-200/60 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-farm-800">Risk Indicators</h3>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      {/* Risk Assessment Matrix */}
+      <div className="tactile-card bg-white p-5">
+        <div className="border-b border-earth-200 pb-3 mb-4">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+            // RISK VECTOR MATRIX
+          </span>
+          <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">
+            Automated Environmental Risk Indicators
+          </h3>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {risks.map((r) => (
-            <div key={r.label} className="flex items-center justify-between rounded-lg bg-earth-50/50 p-3">
-              <span className="text-xs text-earth-600">{r.label}</span>
-              <RiskBadge risk={r.value} />
+            <div key={r.label} className="border border-earth-300 bg-earth-50/80 p-3 flex flex-col justify-between">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-earth-600">
+                {r.label}
+              </span>
+              <div className="mt-3">
+                <RiskBadge risk={r.value} />
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Charts */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-farm-800">Historical Trends</h3>
-        <TimeRangeSelector options={timeOptions} value={range} onChange={(v) => setRange(v as typeof range)} />
-      </div>
-
+      {/* Historical Charts */}
       {historyLoading ? (
-        <LoadingState message="Loading charts..." />
+        <LoadingState message="Compiling environmental telemetry charts..." />
       ) : history ? (
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartCard title="Soil Moisture Trend">
-            <TrendAreaChart data={history.soilMoisture} color="#3d9140" unit="%" />
+          <ChartCard title="Subterranean Moisture Dynamics" subtitle="7-day volumetric water saturation curve">
+            <TrendAreaChart data={history.soilMoisture} color="#1b6d33" unit="%" />
           </ChartCard>
-          <ChartCard title="Soil Temperature Trend">
+          <ChartCard title="Sub-Surface Thermal Gradient" subtitle="Temperature variations measured in Celsius">
             <TrendAreaChart data={history.soilTemperature} color="#d97706" unit="°C" />
           </ChartCard>
         </div>
@@ -94,14 +120,24 @@ export function EnvironmentalRiskPage() {
   );
 }
 
-function EnvCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+function EnvCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="rounded-xl border border-earth-200/60 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-farm-500" />
-        <span className="text-xs text-earth-400">{label}</span>
+    <div className="tactile-card bg-white p-4">
+      <div className="flex items-center justify-between border-b border-earth-200 pb-2">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-earth-500">
+          {label}
+        </span>
+        <Icon className="h-3.5 w-3.5 text-earth-400" />
       </div>
-      <p className="mt-2 text-xl font-semibold text-farm-800">{value}</p>
+      <p className="mt-2 font-mono text-2xl font-bold tracking-tight text-earth-900">{value}</p>
     </div>
   );
 }

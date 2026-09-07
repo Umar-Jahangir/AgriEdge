@@ -23,11 +23,14 @@ interface ChartCardProps {
 
 export function ChartCard({ title, subtitle, children, className, action }: ChartCardProps) {
   return (
-    <div className={cn('rounded-xl border border-earth-200/60 bg-white p-5 shadow-sm', className)}>
-      <div className="mb-4 flex items-start justify-between">
+    <div className={cn('tactile-card bg-white p-5', className)}>
+      <div className="mb-4 flex items-start justify-between border-b border-earth-200 pb-3">
         <div>
-          <h3 className="text-sm font-semibold text-farm-800">{title}</h3>
-          {subtitle && <p className="mt-0.5 text-xs text-earth-400">{subtitle}</p>}
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-farm-800">
+            // TELEMETRY TREND
+          </span>
+          <h3 className="font-display text-sm font-bold uppercase tracking-tight text-earth-900">{title}</h3>
+          {subtitle && <p className="mt-0.5 font-mono text-[11px] text-earth-500">{subtitle}</p>}
         </div>
         {action}
       </div>
@@ -52,7 +55,7 @@ interface TrendLineChartProps {
 
 export function TrendLineChart({
   data,
-  color = '#3d9140',
+  color = '#1b6d33',
   unit = '',
   height = 220,
 }: TrendLineChartProps) {
@@ -63,18 +66,32 @@ export function TrendLineChart({
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={chartData}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e0d5c7" opacity={0.5} />
-        <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#7a6b58' }} tickLine={false} axisLine={false} />
-        <YAxis tick={{ fontSize: 11, fill: '#7a6b58' }} tickLine={false} axisLine={false} width={40} />
+      <LineChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="2 2" stroke="#e3ded2" />
+        <XAxis
+          dataKey="name"
+          tick={{ fontSize: 10, fill: '#5c5243', fontFamily: 'JetBrains Mono, monospace' }}
+          tickLine={false}
+          axisLine={{ stroke: '#d5cebf' }}
+        />
+        <YAxis
+          tick={{ fontSize: 10, fill: '#5c5243', fontFamily: 'JetBrains Mono, monospace' }}
+          tickLine={false}
+          axisLine={{ stroke: '#d5cebf' }}
+          width={40}
+        />
         <Tooltip
           contentStyle={{
-            background: '#fff',
-            border: '1px solid #e0d5c7',
-            borderRadius: '8px',
-            fontSize: '12px',
+            background: '#161715',
+            border: '1px solid #3c3b37',
+            borderRadius: '0px',
+            color: '#f3f2eb',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '11px',
+            boxShadow: 'none',
           }}
-          formatter={(value) => [`${value}${unit}`, '']}
+          itemStyle={{ color: '#f3f2eb' }}
+          formatter={(value) => [`${value}${unit}`, 'VALUE']}
         />
         <Line
           type="monotone"
@@ -82,7 +99,7 @@ export function TrendLineChart({
           stroke={color}
           strokeWidth={2}
           dot={false}
-          activeDot={{ r: 4, fill: color }}
+          activeDot={{ r: 4, fill: color, stroke: '#161715', strokeWidth: 1 }}
         />
       </LineChart>
     </ResponsiveContainer>
@@ -91,7 +108,7 @@ export function TrendLineChart({
 
 export function TrendAreaChart({
   data,
-  color = '#3d9140',
+  color = '#1b6d33',
   unit = '',
   height = 220,
 }: TrendLineChartProps) {
@@ -100,33 +117,49 @@ export function TrendAreaChart({
     value: d.value,
   }));
 
+  const gradientId = `grad-${color.replace(/[^a-zA-Z0-9]/g, '')}`;
+
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <AreaChart data={chartData}>
+      <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
         <defs>
-          <linearGradient id={`gradient-${color}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.2} />
-            <stop offset="95%" stopColor={color} stopOpacity={0} />
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={color} stopOpacity={0.25} />
+            <stop offset="95%" stopColor={color} stopOpacity={0.02} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e0d5c7" opacity={0.5} />
-        <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#7a6b58' }} tickLine={false} axisLine={false} />
-        <YAxis tick={{ fontSize: 11, fill: '#7a6b58' }} tickLine={false} axisLine={false} width={40} />
+        <CartesianGrid strokeDasharray="2 2" stroke="#e3ded2" />
+        <XAxis
+          dataKey="name"
+          tick={{ fontSize: 10, fill: '#5c5243', fontFamily: 'JetBrains Mono, monospace' }}
+          tickLine={false}
+          axisLine={{ stroke: '#d5cebf' }}
+        />
+        <YAxis
+          tick={{ fontSize: 10, fill: '#5c5243', fontFamily: 'JetBrains Mono, monospace' }}
+          tickLine={false}
+          axisLine={{ stroke: '#d5cebf' }}
+          width={40}
+        />
         <Tooltip
           contentStyle={{
-            background: '#fff',
-            border: '1px solid #e0d5c7',
-            borderRadius: '8px',
-            fontSize: '12px',
+            background: '#161715',
+            border: '1px solid #3c3b37',
+            borderRadius: '0px',
+            color: '#f3f2eb',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '11px',
+            boxShadow: 'none',
           }}
-          formatter={(value) => [`${value}${unit}`, '']}
+          itemStyle={{ color: '#f3f2eb' }}
+          formatter={(value) => [`${value}${unit}`, 'READING']}
         />
         <Area
           type="monotone"
           dataKey="value"
           stroke={color}
           strokeWidth={2}
-          fill={`url(#gradient-${color})`}
+          fill={`url(#${gradientId})`}
         />
       </AreaChart>
     </ResponsiveContainer>
@@ -141,20 +174,37 @@ interface BarChartItem {
 export function CoverageBarChart({ data, height = 200 }: { data: BarChartItem[]; height?: number }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} layout="vertical">
-        <CartesianGrid strokeDasharray="3 3" stroke="#e0d5c7" opacity={0.5} horizontal={false} />
-        <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11, fill: '#7a6b58' }} tickLine={false} axisLine={false} />
-        <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#7a6b58' }} tickLine={false} axisLine={false} width={60} />
+      <BarChart data={data} layout="vertical" margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="2 2" stroke="#e3ded2" horizontal={false} />
+        <XAxis
+          type="number"
+          domain={[0, 100]}
+          tick={{ fontSize: 10, fill: '#5c5243', fontFamily: 'JetBrains Mono, monospace' }}
+          tickLine={false}
+          axisLine={{ stroke: '#d5cebf' }}
+        />
+        <YAxis
+          type="category"
+          dataKey="name"
+          tick={{ fontSize: 10, fill: '#5c5243', fontFamily: 'JetBrains Mono, monospace' }}
+          tickLine={false}
+          axisLine={{ stroke: '#d5cebf' }}
+          width={70}
+        />
         <Tooltip
           contentStyle={{
-            background: '#fff',
-            border: '1px solid #e0d5c7',
-            borderRadius: '8px',
-            fontSize: '12px',
+            background: '#161715',
+            border: '1px solid #3c3b37',
+            borderRadius: '0px',
+            color: '#f3f2eb',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '11px',
+            boxShadow: 'none',
           }}
-          formatter={(value) => [`${value}%`, 'Coverage']}
+          itemStyle={{ color: '#f3f2eb' }}
+          formatter={(value) => [`${value}%`, 'COVERAGE']}
         />
-        <Bar dataKey="value" fill="#3d9140" radius={[0, 4, 4, 0]} barSize={20} />
+        <Bar dataKey="value" fill="#1b6d33" barSize={16} />
       </BarChart>
     </ResponsiveContainer>
   );

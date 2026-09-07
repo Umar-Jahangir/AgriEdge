@@ -1,27 +1,35 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --color-farm-50: #f4f9f4;
-  --color-farm-100: #e6f2e8;
-  --color-farm-200: #c8e4cc;
-  --color-farm-300: #9ecf9f;
-  --color-farm-400: #6bb56e;
-  --color-farm-500: #3d9140;
-  --color-farm-600: #2d6b30;
-  --color-farm-700: #1f4d22;
-  --color-farm-800: #153618;
-  --color-farm-900: #0d2210;
-  --color-earth-50: #faf8f5;
-  --color-earth-100: #f0ebe3;
-  --color-earth-200: #e0d5c7;
-  --color-earth-300: #c4b49e;
-  --color-earth-400: #a08f78;
-  --color-earth-500: #7a6b58;
-  --color-earth-600: #5c5042;
-  --color-earth-700: #423a30;
-  --color-earth-800: #2d2822;
-  --color-earth-900: #1a1714;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Rich Chlorophyll & Deep Field Loam */
+  --color-farm-50: #f2f7f3;
+  --color-farm-100: #deeee1;
+  --color-farm-200: #b9ddbf;
+  --color-farm-300: #88c493;
+  --color-farm-400: #55a563;
+  --color-farm-500: #2f853e;
+  --color-farm-600: #1d672d;
+  --color-farm-700: #174f24;
+  --color-farm-800: #123d1c;
+  --color-farm-900: #0d2a14;
+  --color-farm-950: #06170b;
+
+  /* Physical Earth, Warm Linen Canvas & Loam */
+  --color-earth-50: #f7f6f1;
+  --color-earth-100: #ebe8de;
+  --color-earth-200: #dbd6c4;
+  --color-earth-300: #c4bca6;
+  --color-earth-400: #a59b81;
+  --color-earth-500: #847a62;
+  --color-earth-600: #675e4c;
+  --color-earth-700: #4f483a;
+  --color-earth-800: #353027;
+  --color-earth-900: #1f1c16;
+  --color-earth-950: #12100d;
 }
 
 * {
@@ -35,10 +43,38 @@ html {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background-color: #f8faf8;
-  color: #1a2e1c;
+  background-color: #f3f2eb;
+  color: #161715;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+
+code, kbd, samp, pre, .font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Subtle physical agricultural grid texture */
+.field-grid-bg {
+  background-color: #f3f2eb;
+  background-image: radial-gradient(#d3cebc 0.75px, transparent 0.75px);
+  background-size: 20px 20px;
+}
+
+/* Tactile stamped hardware border */
+.tactile-card {
+  background-color: #ffffff;
+  border: 1px solid #d5d0bf;
+  box-shadow: 2px 2px 0px rgba(45, 40, 30, 0.06);
+}
+
+.tactile-card:hover {
+  border-color: #b5ad96;
 }
 
 #root {

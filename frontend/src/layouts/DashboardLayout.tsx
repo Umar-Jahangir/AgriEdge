@@ -9,7 +9,7 @@ export function DashboardLayout() {
   const { data: dashboard } = useDashboard();
 
   return (
-    <div className="flex min-h-screen bg-[#f8faf8]">
+    <div className="flex min-h-screen field-grid-bg text-[#161715]">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
@@ -18,8 +18,10 @@ export function DashboardLayout() {
           roverConnected={dashboard?.connectivity === 'Connected'}
           lastSync={dashboard?.lastSynchronized}
         />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 lg:p-7">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

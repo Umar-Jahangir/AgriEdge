@@ -16,29 +16,34 @@ export function GaugeBar({
   unit = 'ppm',
   max = 80,
   status,
-  statusColor = 'text-farm-600',
+  statusColor = 'text-farm-800',
   showValue = true,
 }: GaugeBarProps) {
   const percent = Math.min(100, Math.round((value / max) * 100));
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5 border-b border-earth-200 pb-3 last:border-0 last:pb-0">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-farm-800">{label}</span>
+        <span className="font-display text-xs font-bold uppercase tracking-wider text-earth-800">
+          {label}
+        </span>
         {showValue && (
-          <span className="text-sm text-earth-600">
-            {value} {unit}
+          <span className="font-mono text-xs font-bold text-earth-900">
+            {value} <span className="font-normal text-earth-500">{unit}</span>
           </span>
         )}
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-earth-100">
+      <div className="h-2 w-full border border-earth-300 bg-earth-100 p-0.5">
         <div
-          className="h-full rounded-full bg-farm-500 transition-all duration-500"
+          className="h-full bg-farm-800 transition-all duration-500"
           style={{ width: `${percent}%` }}
         />
       </div>
       {status && (
-        <p className={cn('text-xs font-medium', statusColor)}>{status}</p>
+        <div className="flex items-center justify-between font-mono text-[10px]">
+          <span className="text-earth-400">STATUS:</span>
+          <span className={cn('font-bold uppercase tracking-wider', statusColor)}>{status}</span>
+        </div>
       )}
     </div>
   );
@@ -54,39 +59,40 @@ interface CircularGaugeProps {
 
 export function CircularGauge({ value, max = 100, label, unit = '%', size = 120 }: CircularGaugeProps) {
   const percent = Math.min(100, (value / max) * 100);
-  const radius = (size - 12) / 2;
+  const radius = (size - 14) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
 
   return (
     <div className="flex flex-col items-center">
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="#e6f2e8"
-          strokeWidth="8"
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="#3d9140"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="transition-all duration-700"
-        />
-      </svg>
-      <div className="absolute flex flex-col items-center justify-center" style={{ width: size, height: size }}>
-        <span className="text-2xl font-bold text-farm-800">{value}</span>
-        <span className="text-xs text-earth-500">{unit}</span>
+      <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="-rotate-90">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="#d5cebf"
+            strokeWidth="8"
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="#1b6d33"
+            strokeWidth="8"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            className="transition-all duration-700"
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center justify-center">
+          <span className="font-mono text-2xl font-bold tracking-tight text-earth-900">{value}</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-earth-500">{unit}</span>
+        </div>
       </div>
-      <p className="mt-2 text-sm font-medium text-earth-600">{label}</p>
+      <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-wider text-earth-700">{label}</p>
     </div>
   );
 }

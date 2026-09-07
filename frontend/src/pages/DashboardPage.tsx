@@ -2,12 +2,8 @@ import {
   Droplets,
   Thermometer,
   FlaskConical,
-  Zap,
   Leaf,
-  Activity,
-  Gauge,
 } from 'lucide-react';
-import { KPICard } from '../components/ui/KPICard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -15,13 +11,14 @@ import { FarmMap } from '../components/farm/FarmMap';
 import { RecommendationCard } from '../components/recommendations/RecommendationCard';
 import { useDashboard, useFarmMap, useRecommendations } from '../hooks/useData';
 import { healthStatusColor } from '../utils/format';
+import { cn } from '../utils/cn';
 
 export function DashboardPage() {
   const { data: dashboard, loading, error, refetch } = useDashboard();
   const { data: farmMap } = useFarmMap();
   const { data: recommendations } = useRecommendations();
 
-  if (loading) return <LoadingState message="Loading dashboard..." />;
+  if (loading) return <LoadingState message="Connecting to rover telemetry..." />;
   if (error || !dashboard) return <ErrorState message={error || 'Failed to load'} onRetry={refetch} />;
 
   const farmStatusVariant =
@@ -29,98 +26,239 @@ export function DashboardPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      {/* Hero Header */}
-      <div className="rounded-xl border border-earth-200/60 bg-white p-6 shadow-sm">
+      {/* Field Workstation Hero Header */}
+      <div className="border border-earth-300 bg-white p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-farm-500">
-              Smart Farming Assistant
-            </p>
-            <h2 className="mt-1 text-2xl font-bold text-farm-800">AI-Powered Field Intelligence</h2>
-            <p className="mt-1 text-sm text-earth-400">
-              Autonomous rover-based monitoring · Edge AI analysis · Actionable recommendations
+            <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-widest text-earth-500">
+              <span className="h-2 w-2 bg-farm-600" />
+              <span>FIELD INTELLIGENCE STATION // SECTOR OVERVIEW</span>
+            </div>
+            <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-earth-950 sm:text-3xl">
+              Autonomous Crop & Soil Telemetry
+            </h2>
+            <p className="mt-0.5 text-xs text-earth-600 font-medium">
+              Real-time in-situ sampling by AgriEdge Rover · On-device Edge AI inference
             </p>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <StatusItem label="Farm Status" value={dashboard.farmStatus} variant={farmStatusVariant} />
-            <StatusItem label="Last Scan" value={dashboard.lastScan} />
-            <StatusItem label="Rover" value={dashboard.roverStatus} variant="success" />
-            <StatusItem label="Connectivity" value={dashboard.connectivity} variant="success" />
+
+          <div className="flex flex-wrap items-center gap-2 border border-earth-200 bg-earth-50/70 p-2 font-mono text-[11px]">
+            <div className="px-2 py-1 border-r border-earth-200">
+              <span className="text-earth-500 block text-[9px] font-bold">FARM STATUS</span>
+              <StatusBadge label={dashboard.farmStatus} variant={farmStatusVariant} dot />
+            </div>
+            <div className="px-2 py-1 border-r border-earth-200">
+              <span className="text-earth-500 block text-[9px] font-bold">ROVER UNIT</span>
+              <span className="font-bold text-earth-900">{dashboard.roverStatus}</span>
+            </div>
+            <div className="px-2 py-1 border-r border-earth-200">
+              <span className="text-earth-500 block text-[9px] font-bold">LINK STATUS</span>
+              <span className="font-bold text-farm-700">100% ONLINE</span>
+            </div>
+            <div className="px-2 py-1">
+              <span className="text-earth-500 block text-[9px] font-bold">LAST TELEMETRY</span>
+              <span className="font-bold text-earth-800">{dashboard.lastScan}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* KPI Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard
-          title="AI Soil Condition Score"
-          value={`${dashboard.soilConditionScore}/100`}
-          status={dashboard.soilConditionStatus}
-          statusColor={healthStatusColor(dashboard.soilConditionStatus)}
-          subtitle="Derived from moisture, pH, EC, NPK & temperature"
-          icon={Gauge}
-        />
-        <KPICard
-          title="Soil Moisture"
-          value={`${dashboard.soilMoisture}%`}
-          status={dashboard.soilMoistureStatus}
-          statusColor={healthStatusColor(dashboard.soilMoistureStatus)}
-          icon={Droplets}
-        />
-        <KPICard
-          title="Temperature"
-          value={`${dashboard.temperature}°C`}
-          icon={Thermometer}
-        />
-        <KPICard
-          title="Soil pH"
-          value={dashboard.soilPh}
-          status={dashboard.soilPhStatus}
-          statusColor={healthStatusColor(dashboard.soilPhStatus)}
-          icon={FlaskConical}
-        />
-        <KPICard
-          title="Electrical Conductivity"
-          value={`${dashboard.electricalConductivity} mS/cm`}
-          icon={Zap}
-        />
-        <KPICard
-          title="NPK Status"
-          value={`N:${dashboard.npk.nitrogen} P:${dashboard.npk.phosphorus} K:${dashboard.npk.potassium}`}
-          subtitle="ppm"
-          icon={Activity}
-        />
-        <KPICard
-          title="Crop Health"
-          value={`${dashboard.cropHealth}%`}
-          statusColor="text-farm-600"
-          icon={Leaf}
-        />
-        <KPICard
-          title="Water Stress"
-          value={dashboard.waterStress}
-          statusColor={
-            dashboard.waterStress === 'LOW' ? 'text-farm-600' : dashboard.waterStress === 'MEDIUM' ? 'text-amber-600' : 'text-red-600'
-          }
-          icon={Droplets}
-        />
+      {/* Asymmetric Bento Grid */}
+      <div className="grid gap-4 lg:grid-cols-4">
+        {/* Tile 1: Primary Hero Telemetry (Spans 2 cols) */}
+        <div className="border border-earth-300 bg-white p-6 lg:col-span-2 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-wider text-earth-500">
+              <span>// PRIMARY METRIC: SOIL CONDITION INDEX</span>
+              <span className="text-[10px] bg-farm-100 px-2 py-0.5 text-farm-800 font-mono">
+                [IN-SITU PROBE]
+              </span>
+            </div>
+            
+            <div className="mt-4 flex items-baseline gap-3">
+              <p className="font-mono text-5xl font-bold tracking-tight text-earth-950 sm:text-6xl">
+                {dashboard.soilConditionScore}
+              </p>
+              <span className="font-mono text-lg text-earth-400">/ 100</span>
+              <span className={cn('ml-auto px-2.5 py-1 font-mono text-xs font-bold uppercase border border-current', healthStatusColor(dashboard.soilConditionStatus))}>
+                {dashboard.soilConditionStatus}
+              </span>
+            </div>
+
+            <p className="mt-3 text-xs text-earth-600 font-medium">
+              Multi-sensor index synthesized from volumetric moisture, pH probe, electrical conductivity, NPK spectroscopy, and thermal probes.
+            </p>
+          </div>
+
+          <div className="mt-6 border-t border-earth-200 pt-4">
+            <div className="h-3 w-full bg-earth-100 overflow-hidden flex border border-earth-300">
+              <div
+                className="h-full bg-farm-600 transition-all duration-700"
+                style={{ width: `${dashboard.soilConditionScore}%` }}
+              />
+            </div>
+            <div className="mt-2 flex justify-between font-mono text-[10px] text-earth-500">
+              <span>0 (CRITICAL)</span>
+              <span>50 (MODERATE)</span>
+              <span>100 (OPTIMAL)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tile 2: Soil Moisture */}
+        <div className="border border-earth-300 bg-white p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-wider text-earth-500">
+              <span>// SOIL MOISTURE</span>
+              <Droplets className="h-4 w-4 text-farm-600" />
+            </div>
+            <p className="mt-3 font-mono text-3xl font-bold text-earth-950">
+              {dashboard.soilMoisture}%
+            </p>
+            <p className="mt-1 text-xs text-earth-600 font-medium">
+              Status: <span className="font-bold text-amber-700">{dashboard.soilMoistureStatus}</span>
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-earth-100 font-mono text-[10px] text-earth-500">
+            TARGET RANGE: 38% - 50%
+          </div>
+        </div>
+
+        {/* Tile 3: Ambient & Soil Temperature */}
+        <div className="border border-earth-300 bg-white p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-wider text-earth-500">
+              <span>// TEMPERATURE</span>
+              <Thermometer className="h-4 w-4 text-farm-600" />
+            </div>
+            <p className="mt-3 font-mono text-3xl font-bold text-earth-950">
+              {dashboard.temperature}°C
+            </p>
+            <p className="mt-1 text-xs text-earth-600 font-medium">
+              Probe: <span className="font-mono text-earth-900 font-bold">24.1°C SOIL / 25.6°C AIR</span>
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-earth-100 font-mono text-[10px] text-earth-500">
+            DIURNAL SWING: NORMAL
+          </div>
+        </div>
+
+        {/* Tile 4: NPK Soil Chemistry (Spans 2 cols) */}
+        <div className="border border-earth-300 bg-white p-5 lg:col-span-2">
+          <div className="flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-wider text-earth-500">
+            <span>// SOIL NUTRIENT PROFILE (NPK RATIO)</span>
+            <span className="font-mono text-[10px] text-earth-500">VALUES IN PPM</span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="border border-earth-200 bg-earth-50/50 p-3">
+              <span className="font-mono text-[10px] text-earth-500 block">NITROGEN (N)</span>
+              <p className="mt-1 font-mono text-2xl font-bold text-earth-950">{dashboard.npk.nitrogen}</p>
+              <span className="mt-1 inline-block text-[10px] font-mono font-bold text-farm-700">
+                [{dashboard.npk.nitrogenStatus.toUpperCase()}]
+              </span>
+            </div>
+            <div className="border border-earth-200 bg-earth-50/50 p-3">
+              <span className="font-mono text-[10px] text-earth-500 block">PHOSPHORUS (P)</span>
+              <p className="mt-1 font-mono text-2xl font-bold text-earth-950">{dashboard.npk.phosphorus}</p>
+              <span className="mt-1 inline-block text-[10px] font-mono font-bold text-farm-700">
+                [{dashboard.npk.phosphorusStatus.toUpperCase()}]
+              </span>
+            </div>
+            <div className="border border-earth-200 bg-earth-50/50 p-3">
+              <span className="font-mono text-[10px] text-earth-500 block">POTASSIUM (K)</span>
+              <p className="mt-1 font-mono text-2xl font-bold text-earth-950">{dashboard.npk.potassium}</p>
+              <span className="mt-1 inline-block text-[10px] font-mono font-bold text-farm-700">
+                [{dashboard.npk.potassiumStatus.toUpperCase()}]
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tile 5: Soil Chemistry pH & EC */}
+        <div className="border border-earth-300 bg-white p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-wider text-earth-500">
+              <span>// CHEMICAL BALANCE</span>
+              <FlaskConical className="h-4 w-4 text-farm-600" />
+            </div>
+            <div className="mt-3 flex items-baseline justify-between">
+              <div>
+                <span className="text-[10px] font-mono text-earth-400">pH LEVEL</span>
+                <p className="font-mono text-2xl font-bold text-earth-950">{dashboard.soilPh}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-mono text-earth-400">CONDUCTIVITY</span>
+                <p className="font-mono text-xl font-bold text-earth-950">{dashboard.electricalConductivity} <span className="text-xs">mS</span></p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 pt-2 border-t border-earth-100 font-mono text-[10px] text-earth-600">
+            ROOT ZONE ACIDITY: OPTIMAL
+          </div>
+        </div>
+
+        {/* Tile 6: Crop Health & Water Stress */}
+        <div className="border border-earth-300 bg-white p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-wider text-earth-500">
+              <span>// CROP VIGOR</span>
+              <Leaf className="h-4 w-4 text-farm-600" />
+            </div>
+            <div className="mt-3 flex items-baseline justify-between">
+              <div>
+                <span className="text-[10px] font-mono text-earth-400">CROP HEALTH</span>
+                <p className="font-mono text-2xl font-bold text-farm-700">{dashboard.cropHealth}%</p>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-mono text-earth-400">WATER STRESS</span>
+                <p className="font-mono text-lg font-bold text-amber-700">[{dashboard.waterStress}]</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 pt-2 border-t border-earth-100 font-mono text-[10px] text-earth-600">
+            EDGE AI VISION: NOMINAL
+          </div>
+        </div>
       </div>
 
-      {/* Farm Map + Recommendations */}
+      {/* Field Map + Priority Advisories */}
       <div className="grid gap-6 lg:grid-cols-5">
-        <div className="lg:col-span-3">
+        {/* Field Map Section (3 cols) */}
+        <div className="lg:col-span-3 space-y-3">
+          <div className="flex items-center justify-between font-mono text-xs font-bold uppercase text-earth-600">
+            <span>// FIELD TOPOGRAPHY & ROVER TRAJECTORY</span>
+            <span className="text-[10px] text-earth-400">[COORDINATE GRID: 4-ZONE]</span>
+          </div>
           {farmMap && <FarmMap data={farmMap} />}
           {farmMap && (
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <MiniStat label="Rover" value={farmMap.rover.state} />
-              <MiniStat label="Location" value={`${farmMap.rover.currentZone} - Pt ${farmMap.rover.currentSamplingPoint}`} />
-              <MiniStat label="Distance" value={`${farmMap.rover.distanceCovered} km`} />
-              <MiniStat label="Battery" value={`${farmMap.rover.battery}%`} />
+            <div className="grid grid-cols-2 gap-2 font-mono text-xs sm:grid-cols-4">
+              <div className="border border-earth-300 bg-white p-2 text-center">
+                <span className="text-[10px] text-earth-500 block">ROVER STATE</span>
+                <span className="font-bold text-earth-950">{farmMap.rover.state}</span>
+              </div>
+              <div className="border border-earth-300 bg-white p-2 text-center">
+                <span className="text-[10px] text-earth-500 block">WAYPOINT</span>
+                <span className="font-bold text-earth-950">Pt {farmMap.rover.currentSamplingPoint} of {farmMap.rover.totalSamplingPoints}</span>
+              </div>
+              <div className="border border-earth-300 bg-white p-2 text-center">
+                <span className="text-[10px] text-earth-500 block">TRAVELED</span>
+                <span className="font-bold text-earth-950">{farmMap.rover.distanceCovered} km</span>
+              </div>
+              <div className="border border-earth-300 bg-white p-2 text-center">
+                <span className="text-[10px] text-earth-500 block">BATTERY</span>
+                <span className="font-bold text-farm-700">{farmMap.rover.battery}%</span>
+              </div>
             </div>
           )}
         </div>
-        <div className="lg:col-span-2">
-          <h3 className="mb-3 text-sm font-semibold text-farm-800">Latest AI Recommendations</h3>
+
+        {/* Actionable Field Advisories (2 cols) */}
+        <div className="lg:col-span-2 space-y-3">
+          <div className="flex items-center justify-between font-mono text-xs font-bold uppercase text-earth-600">
+            <span>// ACTIONABLE FIELD PRESCRIPTIONS</span>
+            <span className="text-[10px] text-earth-400">AI FUSED</span>
+          </div>
           <div className="space-y-3">
             {recommendations?.slice(0, 3).map((rec) => (
               <RecommendationCard key={rec.id} recommendation={rec} />
@@ -128,36 +266,6 @@ export function DashboardPage() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function StatusItem({
-  label,
-  value,
-  variant,
-}: {
-  label: string;
-  value: string;
-  variant?: 'success' | 'warning' | 'danger';
-}) {
-  return (
-    <div className="text-center sm:text-left">
-      <p className="text-[10px] uppercase tracking-wider text-earth-400">{label}</p>
-      {variant ? (
-        <StatusBadge label={value} variant={variant} dot className="mt-1" />
-      ) : (
-        <p className="mt-1 text-sm font-semibold text-farm-800">{value}</p>
-      )}
-    </div>
-  );
-}
-
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-earth-200/60 bg-white px-3 py-2 text-center shadow-sm">
-      <p className="text-[10px] text-earth-400">{label}</p>
-      <p className="text-xs font-semibold text-farm-800">{value}</p>
     </div>
   );
 }
