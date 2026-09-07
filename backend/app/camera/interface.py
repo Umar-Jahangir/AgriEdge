@@ -23,12 +23,17 @@ class MockCamera(CameraInterface):
     return True
 
   def capture(self, zone_id: str) -> Path | None:
+    from PIL import Image, ImageDraw
     settings.images_dir.mkdir(parents=True, exist_ok=True)
     filename = f"mock_{zone_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.jpg"
     path = settings.images_dir / filename
-    # Create placeholder file for development
-    path.write_bytes(b"MOCK_IMAGE_PLACEHOLDER")
-    logger.info("Mock camera captured: %s", path)
+    # Create valid synthetic foliage image for development and testing
+    img = Image.new("RGB", (224, 224), color=(34, 139, 34))
+    draw = ImageDraw.Draw(img)
+    draw.ellipse((40, 20, 184, 204), fill=(46, 160, 67), outline=(20, 100, 25))
+    draw.line((112, 20, 112, 204), fill=(20, 100, 25), width=2)
+    img.save(path, "JPEG")
+    logger.info("Mock camera captured synthetic image: %s", path)
     return path
 
 

@@ -88,6 +88,11 @@ class VisionPrediction(BaseModel):
     model_type: str
     prediction_class: str
     confidence: float
+    crop: str | None = None
+    condition: str | None = None
+    is_healthy: bool = False
+    treatment: str | None = None
+    top_k: list[dict[str, Any]] | None = None
     bbox: list[float] | None = None
     note: str | None = None
 
@@ -111,9 +116,13 @@ class ImageAnalyzeRequest(BaseModel):
 
 
 class ImageAnalyzeResponse(BaseModel):
-    image_id: int
+    image_id: int | str
     zone_id: str
+    image_url: str | None = None
     predictions: list[VisionPrediction]
+    top_prediction: VisionPrediction | None = None
+    crop_health: str | None = None
+    crop_health_percent: int | None = None
     fused_assessment: dict[str, Any] | None = None
 
 

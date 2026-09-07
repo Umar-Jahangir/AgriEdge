@@ -148,7 +148,52 @@ export const api = {
       await delay();
       return mockCropAnalyses;
     }
-    return fetchAPI<CropAnalysis[]>(API_CONFIG.ENDPOINTS.CROP_ANALYSIS);
+    const items = await fetchAPI<CropAnalysis[]>(API_CONFIG.ENDPOINTS.CROP_ANALYSIS);
+    return items.map((item) => ({
+      ...item,
+      imageUrl: item.imageUrl?.startsWith('/images/') ? `${API_CONFIG.BASE_URL}${item.imageUrl}` : item.imageUrl,
+    }));
+  },
+
+  async uploadCropImage(file: File, zoneId = 'ZONE_B'): Promise<CropAnalysis> {
+    if (API_CONFIG.USE_MOCK) {
+      await delay(600);
+      return {
+        id: `scan-mock-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        imageUrl: URL.createObjectURL(file),
+        diseaseDetection: 'Corn: Northern Leaf Blight',
+        confidence: 91,
+        cropHealth: 'Possible Disease Detected',
+        cropHealthPercent: 68,
+        zoneId,
+        notes: 'Simulated AI detection on uploaded image.',
+      };
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/api/images/analyze?zone_id=${encodeURIComponent(zoneId)}`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    if (!response.ok) throw new Error(`Image analysis failed with status: ${response.status}`);
+    const data = await response.json();
+    const top = data.top_prediction || (data.predictions && data.predictions[0]);
+    const fullImageUrl = data.image_url ? `${API_CONFIG.BASE_URL}${data.image_url}` : URL.createObjectURL(file);
+    return {
+      id: `scan-${data.image_id}`,
+      timestamp: new Date().toISOString(),
+      imageUrl: fullImageUrl,
+      diseaseDetection: top?.prediction_class || 'Analysis complete',
+      confidence: Math.round((top?.confidence || 0.9) * 100),
+      cropHealth: (data.crop_health as CropAnalysis['cropHealth']) || (top?.is_healthy ? 'Healthy' : 'Possible Disease Detected'),
+      cropHealthPercent: data.crop_health_percent ?? (top?.is_healthy ? 95 : 65),
+      zoneId: data.zone_id || zoneId,
+      notes: top?.treatment || top?.note || 'Edge AI analysis complete.',
+    };
   },
 
   async getRecommendations(): Promise<Recommendation[]> {

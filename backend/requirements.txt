@@ -14,7 +14,7 @@ python-dotenv>=1.0.1
 
 # AI / ML (install on dev machine; optional subset on Pi)
 # opencv-python-headless>=4.10.0
-# onnxruntime>=1.20.0
+onnxruntime>=1.20.0
 # torch>=2.5.0
 # ultralytics>=8.3.0
 

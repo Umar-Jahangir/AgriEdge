@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Camera, Upload, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Camera, Upload, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
 import { useCropAnalyses } from '../hooks/useData';
+import { api } from '../services/api';
 import { formatTimestamp } from '../utils/format';
 import { cn } from '../utils/cn';
-import type { CropHealthStatus } from '../types';
+import type { CropAnalysis, CropHealthStatus } from '../types';
 
 const healthStyles: Record<CropHealthStatus, { color: string; icon: typeof CheckCircle }> = {
   Healthy: { color: 'text-farm-600 bg-farm-50', icon: CheckCircle },
@@ -15,22 +16,40 @@ const healthStyles: Record<CropHealthStatus, { color: string; icon: typeof Check
 };
 
 export function CropHealthPage() {
-  const { data: analyses, loading, error, refetch } = useCropAnalyses();
+  const { data: initialAnalyses, loading, error, refetch } = useCropAnalyses();
+  const [localScans, setLocalScans] = useState<CropAnalysis[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   if (loading) return <LoadingState message="Loading crop analyses..." />;
-  if (error || !analyses) return <ErrorState message={error || 'Failed to load'} onRetry={refetch} />;
+  if (error || !initialAnalyses) return <ErrorState message={error || 'Failed to load'} onRetry={refetch} />;
 
-  const latest = analyses[0];
-  const selected = selectedId ? analyses.find((a) => a.id === selectedId) || latest : latest;
-  const style = healthStyles[selected.cropHealth];
+  const allScans = [...localScans, ...initialAnalyses];
+  const latest = allScans[0];
+  const selected = selectedId ? allScans.find((a) => a.id === selectedId) || latest : latest;
+  const style = healthStyles[selected.cropHealth] || healthStyles['Healthy'];
+  const displayImage = selected.imageUrl || uploadPreview;
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setUploadPreview(url);
+    if (!file) return;
+
+    const preview = URL.createObjectURL(file);
+    setUploadPreview(preview);
+    setIsAnalyzing(true);
+    setUploadError(null);
+
+    try {
+      const result = await api.uploadCropImage(file, 'ZONE_B');
+      setLocalScans((prev) => [result, ...prev]);
+      setSelectedId(result.id);
+    } catch (err: any) {
+      setUploadError(err.message || 'Failed to analyze crop image');
+    } finally {
+      setIsAnalyzing(false);
+      e.target.value = '';
     }
   };
 
@@ -39,7 +58,7 @@ export function CropHealthPage() {
       <div>
         <h2 className="text-xl font-bold text-farm-800">Crop Health</h2>
         <p className="mt-1 text-sm text-earth-400">
-          Images captured by rover camera — ready for AI disease & deficiency detection
+          Edge AI leaf disease & nutrient deficiency detection powered by MobileNetV3 ONNX
         </p>
       </div>
 
@@ -47,14 +66,29 @@ export function CropHealthPage() {
         {/* Latest Scan */}
         <div className="lg:col-span-2">
           <div className="rounded-xl border border-earth-200/60 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-earth-100 px-5 py-3">
-              <h3 className="text-sm font-semibold text-farm-800">Latest Scan</h3>
-              <p className="text-xs text-earth-400">{selected.notes}</p>
+            <div className="border-b border-earth-100 px-5 py-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-farm-800">
+                  {selectedId ? `Scan: ${selected.id}` : 'Latest Scan'}
+                </h3>
+                <p className="text-xs text-earth-400">{selected.notes}</p>
+              </div>
+              <span className="rounded-full bg-farm-100 px-2.5 py-0.5 text-[11px] font-semibold text-farm-800">
+                {selected.zoneId.toUpperCase()}
+              </span>
             </div>
 
             <div className="relative flex h-64 items-center justify-center bg-gradient-to-br from-farm-50 to-earth-50 sm:h-80">
-              {uploadPreview ? (
-                <img src={uploadPreview} alt="Uploaded crop" className="h-full w-full object-cover" />
+              {isAnalyzing && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+                  <Loader2 className="h-8 w-8 animate-spin text-farm-600" />
+                  <p className="mt-2 text-sm font-medium text-farm-800">Running Edge AI inference...</p>
+                  <p className="text-xs text-earth-400">Analyzing plant leaf foliage</p>
+                </div>
+              )}
+
+              {displayImage ? (
+                <img src={displayImage} alt="Crop scan" className="h-full w-full object-cover" />
               ) : (
                 <div className="text-center">
                   <Camera className="mx-auto h-12 w-12 text-farm-300" />
@@ -84,41 +118,67 @@ export function CropHealthPage() {
         {/* Upload + Previous Scans */}
         <div className="space-y-4">
           <div className="rounded-xl border-2 border-dashed border-earth-200 bg-white p-6 text-center shadow-sm">
-            <Upload className="mx-auto h-8 w-8 text-earth-300" />
+            <Upload className="mx-auto h-8 w-8 text-farm-600" />
             <p className="mt-2 text-sm font-medium text-farm-800">Upload Crop Image</p>
             <p className="mt-1 text-xs text-earth-400">
-              For manual image analysis — will connect to AI model
+              Run instant on-device diagnosis with the trained ML model
             </p>
-            <label className="mt-4 inline-block cursor-pointer rounded-lg bg-farm-600 px-4 py-2 text-xs font-semibold text-white hover:bg-farm-700">
-              Choose File
-              <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+
+            {uploadError && (
+              <p className="mt-2 text-xs text-red-600 font-medium">{uploadError}</p>
+            )}
+
+            <label
+              className={cn(
+                'mt-4 inline-flex items-center gap-1.5 cursor-pointer rounded-lg bg-farm-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-farm-700',
+                isAnalyzing && 'pointer-events-none opacity-60'
+              )}
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                'Choose File'
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={isAnalyzing}
+                onChange={handleUpload}
+              />
             </label>
           </div>
 
           <div className="rounded-xl border border-earth-200/60 bg-white p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-farm-800">Previous Scans</h3>
-            <div className="mt-3 space-y-2">
-              {analyses.map((scan) => (
-                <button
-                  key={scan.id}
-                  onClick={() => setSelectedId(scan.id)}
-                  className={cn(
-                    'w-full rounded-lg border p-3 text-left transition-colors',
-                    (selectedId || latest.id) === scan.id
-                      ? 'border-farm-300 bg-farm-50'
-                      : 'border-earth-100 hover:bg-earth-50'
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-farm-800">{scan.zoneId.toUpperCase()}</span>
-                    <span className={cn('text-[10px] font-medium', healthStyles[scan.cropHealth].color.split(' ')[0])}>
-                      {scan.cropHealthPercent}%
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[11px] text-earth-400">{formatTimestamp(scan.timestamp)}</p>
-                  <p className="text-[11px] text-earth-500">{scan.diseaseDetection}</p>
-                </button>
-              ))}
+            <div className="mt-3 max-h-80 space-y-2 overflow-y-auto pr-1">
+              {allScans.map((scan) => {
+                const scanStyle = healthStyles[scan.cropHealth] || healthStyles['Healthy'];
+                return (
+                  <button
+                    key={scan.id}
+                    onClick={() => setSelectedId(scan.id)}
+                    className={cn(
+                      'w-full rounded-lg border p-3 text-left transition-colors',
+                      (selectedId || latest.id) === scan.id
+                        ? 'border-farm-300 bg-farm-50'
+                        : 'border-earth-100 hover:bg-earth-50'
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-farm-800">{scan.zoneId.toUpperCase()}</span>
+                      <span className={cn('text-[10px] font-medium', scanStyle.color.split(' ')[0])}>
+                        {scan.cropHealthPercent}%
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-earth-400">{formatTimestamp(scan.timestamp)}</p>
+                    <p className="text-[11px] font-medium text-earth-600 truncate">{scan.diseaseDetection}</p>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

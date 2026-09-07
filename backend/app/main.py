@@ -6,6 +6,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.staticfiles import StaticFiles
+
 from app.api.routes import router
 from app.config import get_settings
 from app.database.session import init_db
@@ -22,6 +24,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
   logger.info("Starting %s v%s (mock=%s, demo=%s)", settings.app_name, settings.app_version, settings.mock_mode, settings.demo_mode)
+  settings.images_dir.mkdir(parents=True, exist_ok=True)
   init_db()
   yield
   logger.info("Shutting down %s", settings.app_name)
@@ -41,6 +44,9 @@ app.add_middleware(
   allow_methods=["*"],
   allow_headers=["*"],
 )
+
+settings.images_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/images", StaticFiles(directory=str(settings.images_dir)), name="images")
 
 app.include_router(router, prefix="/api")
 
