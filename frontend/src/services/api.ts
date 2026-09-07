@@ -48,10 +48,56 @@ export interface SensorHistoryData {
 
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** The FastAPI API uses snake_case; React components use camelCase. */
+function toCamelCase(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(toCamelCase);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()),
+        toCamelCase(item),
+      ])
+    );
+  }
+  return value;
+}
+
+function toSensorReading(value: SensorReading): SensorReading {
+  const source = value as SensorReading & { ph?: number; ec?: number; humidity?: number };
+  return {
+    ...source,
+    soilPh: source.soilPh ?? source.ph ?? 0,
+    electricalConductivity: source.electricalConductivity ?? source.ec ?? 0,
+    airHumidity: source.airHumidity ?? source.humidity ?? 0,
+    samplingPoint: source.samplingPoint ?? 0,
+  };
+}
+
+function toRoverStatus(value: RoverStatus): RoverStatus {
+  return { ...value, position: value.position ?? { x: 55, y: 62 } };
+}
+
+function toFarmZone(value: FarmZone): FarmZone {
+  const zone = value as FarmZone & { nitrogen?: number; phosphorus?: number; potassium?: number };
+  return {
+    ...zone,
+    npk: zone.npk ?? {
+      nitrogen: zone.nitrogen ?? 0,
+      phosphorus: zone.phosphorus ?? 0,
+      potassium: zone.potassium ?? 0,
+      nitrogenStatus: (zone.nitrogen ?? 0) >= 50 ? 'Good' : 'Moderate',
+      phosphorusStatus: (zone.phosphorus ?? 0) >= 30 ? 'Good' : 'Moderate',
+      potassiumStatus: (zone.potassium ?? 0) >= 45 ? 'Good' : 'Moderate',
+      timestamp: new Date().toISOString(),
+    },
+    position: zone.position ?? { row: 0, col: 0 },
+  };
+}
+
 async function fetchAPI<T>(endpoint: string): Promise<T> {
   const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`);
   if (!response.ok) throw new Error(`API error: ${response.status}`);
-  return response.json() as Promise<T>;
+  return toCamelCase(await response.json()) as T;
 }
 
 async function postAPI<T>(endpoint: string, body?: unknown): Promise<T> {
@@ -61,7 +107,7 @@ async function postAPI<T>(endpoint: string, body?: unknown): Promise<T> {
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!response.ok) throw new Error(`API error: ${response.status}`);
-  return response.json() as Promise<T>;
+  return toCamelCase(await response.json()) as T;
 }
 
 export const api = {
@@ -78,7 +124,7 @@ export const api = {
       await delay();
       return mockLatestSensor;
     }
-    return fetchAPI<SensorReading>(API_CONFIG.ENDPOINTS.SENSORS_LATEST);
+    return toSensorReading(await fetchAPI<SensorReading>(API_CONFIG.ENDPOINTS.SENSORS_LATEST));
   },
 
   async getSensorHistory(range: TimeRange): Promise<SensorHistoryData> {
@@ -126,7 +172,7 @@ export const api = {
       await delay(150);
       return getSimulatedRoverStatus();
     }
-    return fetchAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_STATUS);
+    return toRoverStatus(await fetchAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_STATUS));
   },
 
   async startRover(): Promise<RoverStatus> {
@@ -134,7 +180,7 @@ export const api = {
       await delay(500);
       return simulateRoverAction('start');
     }
-    return postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_START);
+    return toRoverStatus(await postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_START));
   },
 
   async pauseRover(): Promise<RoverStatus> {
@@ -142,7 +188,7 @@ export const api = {
       await delay(300);
       return simulateRoverAction('pause');
     }
-    return postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_PAUSE);
+    return toRoverStatus(await postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_PAUSE));
   },
 
   async resumeRover(): Promise<RoverStatus> {
@@ -150,7 +196,7 @@ export const api = {
       await delay(300);
       return simulateRoverAction('resume');
     }
-    return postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_RESUME);
+    return toRoverStatus(await postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_RESUME));
   },
 
   async returnRover(): Promise<RoverStatus> {
@@ -158,7 +204,7 @@ export const api = {
       await delay(500);
       return simulateRoverAction('return');
     }
-    return postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_RETURN);
+    return toRoverStatus(await postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_RETURN));
   },
 
   async emergencyStopRover(): Promise<RoverStatus> {
@@ -166,7 +212,7 @@ export const api = {
       await delay(200);
       return simulateRoverAction('emergency-stop');
     }
-    return postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_EMERGENCY_STOP);
+    return toRoverStatus(await postAPI<RoverStatus>(API_CONFIG.ENDPOINTS.ROVER_EMERGENCY_STOP));
   },
 
   async getEnvironmentalRisk(): Promise<EnvironmentalRisk> {
@@ -190,7 +236,7 @@ export const api = {
       await delay();
       return mockFarmZones;
     }
-    return fetchAPI<FarmZone[]>(API_CONFIG.ENDPOINTS.FARM_ZONES);
+    return (await fetchAPI<FarmZone[]>(API_CONFIG.ENDPOINTS.FARM_ZONES)).map(toFarmZone);
   },
 
   async getFarmMap(): Promise<FarmMapData> {
@@ -199,7 +245,8 @@ export const api = {
       const rover = getSimulatedRoverStatus();
       return { ...mockFarmMap, rover };
     }
-    return fetchAPI<FarmMapData>(API_CONFIG.ENDPOINTS.FARM_MAP);
+    const map = await fetchAPI<FarmMapData>(API_CONFIG.ENDPOINTS.FARM_MAP);
+    return { ...map, rover: toRoverStatus(map.rover), zones: map.zones.map(toFarmZone) };
   },
 
   async getAIAnalysis(): Promise<AIAnalysisResult> {

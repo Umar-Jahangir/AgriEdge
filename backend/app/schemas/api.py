@@ -190,6 +190,7 @@ class DashboardSummary(BaseModel):
     soil_ph: float
     soil_ph_status: str
     electrical_conductivity: float
+    npk: "DashboardNPK"
     crop_health: int
     water_stress: str
     last_synchronized: str
@@ -197,3 +198,13 @@ class DashboardSummary(BaseModel):
     healthy_zones: int
     at_risk_zones: int
     is_demo: bool = True
+
+
+class DashboardNPK(BaseModel):
+    nitrogen: float
+    phosphorus: float
+    potassium: float
+    nitrogen_status: str
+    phosphorus_status: str
+    potassium_status: str
+    timestamp: str

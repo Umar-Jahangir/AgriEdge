@@ -1,6 +1,6 @@
 """API route handlers."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -15,6 +15,7 @@ from app.schemas.api import (
   AIAnalysisResult,
   AlertResponse,
   DashboardSummary,
+  DashboardNPK,
   FarmResponse,
   HealthResponse,
   ImageAnalyzeResponse,
@@ -124,6 +125,15 @@ def dashboard():
     soil_ph=zone_b["ph"],
     soil_ph_status="Optimal",
     electrical_conductivity=zone_b["ec"],
+    npk=DashboardNPK(
+      nitrogen=zone_b["nitrogen"],
+      phosphorus=zone_b["phosphorus"],
+      potassium=zone_b["potassium"],
+      nitrogen_status="Good" if zone_b["nitrogen"] >= 50 else "Moderate",
+      phosphorus_status="Good" if zone_b["phosphorus"] >= 30 else "Moderate",
+      potassium_status="Good" if zone_b["potassium"] >= 45 else "Moderate",
+      timestamp=datetime.utcnow().isoformat(),
+    ),
     crop_health=zone_b["crop_health"],
     water_stress="MEDIUM",
     last_synchronized=datetime.utcnow().strftime("%I:%M:%S %p"),
@@ -150,6 +160,107 @@ def latest_sensors(zone_id: str = "ZONE_B"):
     air_temperature=z["air_temperature"], humidity=z["humidity"],
     timestamp=datetime.utcnow(),
   )
+
+
+def _history_points(values: list[float]) -> list[dict]:
+  """Create recent, timestamped demo measurements for dashboard charts."""
+  start = datetime.utcnow() - timedelta(days=len(values) - 1)
+  return [
+    {"timestamp": (start + timedelta(days=index)).isoformat(), "value": value}
+    for index, value in enumerate(values)
+  ]
+
+
+@router.get("/sensors/history")
+def sensor_history(range: str = "7d"):
+  """Historical sensor data used by the Soil Health and Risk pages in demo mode."""
+  # The range is accepted for API compatibility. Demo data is a representative
+  # recent sequence until persisted sensor history is connected.
+  return {
+    "soil_moisture": _history_points([41, 39, 37, 35, 33, 34, 35.3]),
+    "soil_temperature": _history_points([24.1, 24.5, 25.0, 25.4, 25.8, 25.5, 25.6]),
+    "ph": _history_points([6.7, 6.7, 6.6, 6.6, 6.5, 6.5, 6.5]),
+    "ec": _history_points([1.2, 1.2, 1.15, 1.1, 1.1, 1.12, 1.1]),
+    "nitrogen": _history_points([54, 53, 52, 50, 49, 48, 48]),
+    "phosphorus": _history_points([30, 30, 29, 28, 28, 27, 27]),
+    "potassium": _history_points([46, 46, 45, 44, 43, 42, 42]),
+  }
+
+
+@router.get("/soil-analysis")
+def soil_analysis():
+  zone = get_demo_zone("ZONE_B")
+  return {
+    "overall_score": zone["soil_score"],
+    "moisture": "Moderate",
+    "ph": "Good",
+    "npk": "Moderate",
+    "ec": "Good",
+    "temperature": "Good",
+    "derived_from": "Derived from simulated moisture, pH, EC, NPK and temperature readings.",
+    "timestamp": datetime.utcnow().isoformat(),
+  }
+
+
+@router.get("/crop-analysis")
+def crop_analysis():
+  return [
+    {
+      "id": "scan-zone-c",
+      "timestamp": datetime.utcnow().isoformat(),
+      "image_url": "",
+      "disease_detection": "Possible disease detected",
+      "confidence": 0.87,
+      "crop_health": "Possible Disease Detected",
+      "crop_health_percent": 65,
+      "zone_id": "ZONE_C",
+      "notes": "Demo analysis generated without a connected camera.",
+    },
+    {
+      "id": "scan-zone-a",
+      "timestamp": (datetime.utcnow() - timedelta(hours=2)).isoformat(),
+      "image_url": "",
+      "disease_detection": "No significant issues detected",
+      "confidence": 0.94,
+      "crop_health": "Healthy",
+      "crop_health_percent": 91,
+      "zone_id": "ZONE_A",
+      "notes": "Demo analysis generated without a connected camera.",
+    },
+  ]
+
+
+@router.get("/environmental-risk")
+def environmental_risk():
+  zone = get_demo_zone("ZONE_B")
+  return {
+    "drought_risk": "MEDIUM",
+    "flood_risk": "LOW",
+    "heat_stress_risk": "HIGH",
+    "crop_disease_risk": "MEDIUM",
+    "water_stress_risk": "MEDIUM",
+    "air_temperature": zone["air_temperature"],
+    "humidity": zone["humidity"],
+    "soil_temperature": zone["soil_temperature"],
+    "soil_moisture": zone["soil_moisture"],
+    "weather_integration_pending": True,
+    "timestamp": datetime.utcnow().isoformat(),
+  }
+
+
+@router.get("/analytics")
+def analytics(range: str = "7d"):
+  history = sensor_history(range)
+  return {
+    **history,
+    "crop_health": _history_points([91, 88, 84, 80, 76, 72, 72]),
+    "soil_condition_score": _history_points([84, 81, 78, 74, 71, 69, 68]),
+    "environmental_risk": _history_points([22, 28, 35, 48, 56, 61, 64]),
+    "sampling_coverage": [
+      {"zone_id": z["id"], "zone_name": z["name"], "coverage": z["sampling_coverage"]}
+      for z in get_all_demo_zones()
+    ],
+  }
 
 
 @router.post("/sensors/telemetry", response_model=SensorReadingResponse)
@@ -268,3 +379,36 @@ def ai_analysis_compat(zone_id: str = "ZONE_B"):
 @router.get("/farm-zones", response_model=list[ZoneSummary])
 def farm_zones_compat():
   return list_zones()
+
+
+@router.get("/farm-map")
+def farm_map_compat():
+  """Dashboard map data for the React frontend's live-data mode."""
+  rover = get_rover_status()
+  points = [
+    {
+      "id": f"point-{index}",
+      "zone_id": f"ZONE_{chr(65 + ((index - 1) % 4))}",
+      "point_number": index,
+      "x": 12 + ((index - 1) % 5) * 19,
+      "y": 18 + ((index - 1) // 5) * 20,
+      "status": "current" if index == rover.current_sampling_point else "completed" if index < rover.current_sampling_point else "pending",
+    }
+    for index in range(1, rover.total_sampling_points + 1)
+  ]
+  points.extend([
+    {"id": "attention-zone-b", "zone_id": "ZONE_B", "point_number": 31, "x": 72, "y": 30, "status": "attention"},
+    {"id": "attention-zone-c", "zone_id": "ZONE_C", "point_number": 32, "x": 30, "y": 72, "status": "attention"},
+  ])
+  return {
+    "rover": {
+      **rover.model_dump(),
+      "position": {"x": 55, "y": 62},
+    },
+    "sampling_points": points,
+    "zones": list_zones(),
+    "attention_areas": [
+      {"x": 72, "y": 30, "zone_id": "ZONE_B"},
+      {"x": 30, "y": 72, "zone_id": "ZONE_C"},
+    ],
+  }
