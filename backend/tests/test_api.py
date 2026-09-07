@@ -47,3 +47,26 @@ def test_tts_endpoint_fallback():
   data = r.json()
   assert "fallback" in data or r.headers.get("content-type") == "audio/mpeg"
 
+
+def test_live_weather():
+  r = client.get("/api/weather/live")
+  assert r.status_code == 200
+  data = r.json()
+  assert "current_weather" in data
+  assert "predictions" in data
+  assert "flood" in data["predictions"]
+  assert "drought" in data["predictions"]
+  assert "heat_stress" in data["predictions"]
+  assert "daily_forecast" in data
+
+
+def test_environmental_risk():
+  r = client.get("/api/environmental-risk")
+  assert r.status_code == 200
+  data = r.json()
+  assert "drought_risk" in data
+  assert "flood_risk" in data
+  assert "current_weather" in data
+  assert data["weather_integration_pending"] is False
+
+

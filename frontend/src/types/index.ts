@@ -106,6 +106,78 @@ export interface FarmZone {
   position: { row: number; col: number };
 }
 
+export interface CurrentWeather {
+  temperature: number;
+  apparentTemperature: number;
+  humidity: number;
+  precipitationRate: number;
+  windSpeed: number;
+  weatherCode: number;
+  condition: string;
+  conditionHi?: string;
+  conditionMr?: string;
+  icon: string;
+}
+
+export interface DailyForecastItem {
+  date: string;
+  tempMax: number;
+  tempMin: number;
+  precipitationMm: number;
+  precipProbability: number;
+  et0Mm: number;
+  riverDischargeM3s: number;
+  condition: string;
+  conditionHi?: string;
+  conditionMr?: string;
+  icon: string;
+}
+
+export interface FloodPrediction {
+  severity: RiskLevel;
+  probability: number;
+  rain48hForecastMm: number;
+  peakRiverDischargeM3s: number;
+  meanRiverDischargeM3s: number;
+  surfaceRunoffRisk: string;
+  model: string;
+}
+
+export interface DroughtPrediction {
+  severity: RiskLevel;
+  probability: number;
+  netWaterBalance7dMm: number;
+  totalEvapotranspiration7dMm: number;
+  totalRain7dMm: number;
+  daysOfWaterReserve: number;
+  model: string;
+}
+
+export interface HeatStressPrediction {
+  severity: RiskLevel;
+  probability: number;
+  peakTempForecast: number;
+  apparentHeatIndex: number;
+  imdStatus: string;
+  model: string;
+}
+
+export interface FoliarDiseasePrediction {
+  severity: RiskLevel;
+  probability: number;
+  relativeHumidity: number;
+  infectionWindowActive: boolean;
+  model: string;
+}
+
+export interface AgroPredictions {
+  flood: FloodPrediction;
+  drought: DroughtPrediction;
+  heatStress: HeatStressPrediction;
+  foliarDisease: FoliarDiseasePrediction;
+  waterStress: { severity: RiskLevel };
+}
+
 export interface EnvironmentalRisk {
   droughtRisk: RiskLevel;
   floodRisk: RiskLevel;
@@ -120,6 +192,11 @@ export interface EnvironmentalRisk {
   weatherCondition?: string;
   weatherIntegrationPending: boolean;
   timestamp: string;
+  currentWeather?: CurrentWeather;
+  predictions?: AgroPredictions;
+  dailyForecast?: DailyForecastItem[];
+  advisories?: Record<string, { title: string; action: string; cause: string }>;
+  source?: string;
 }
 
 export interface DashboardSummary {

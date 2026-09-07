@@ -78,12 +78,29 @@ export interface Translations {
   active: string;
   resolved: string;
 
-  // Risk Vectors
+  // Risk Vectors & Weather Predictions
   droughtRisk: string;
   floodRisk: string;
   heatStressRisk: string;
   diseaseRisk: string;
   waterStressRisk: string;
+  liveWeatherTitle: string;
+  sevenDayForecast: string;
+  rainForecast: string;
+  riverDischarge: string;
+  waterBalance: string;
+  daysWaterReserve: string;
+  floodModel: string;
+  droughtModel: string;
+  heatWaveModel: string;
+  diseaseModel: string;
+  agroAdvisoryTitle: string;
+  precipitationProbability: string;
+  soilSaturationRunoff: string;
+  evapotranspiration: string;
+  apparentTemp: string;
+  windSpeedLabel: string;
+  glofasRiverDischarge: string;
 
   // Rover & Controls
   startMission: string;
@@ -207,10 +224,27 @@ export const translations: Record<Language, Translations> = {
     resolved: 'Resolved',
 
     droughtRisk: 'Drought Risk',
-    floodRisk: 'Flood Risk',
-    heatStressRisk: 'Heat Stress Risk',
-    diseaseRisk: 'Disease Risk',
+    floodRisk: 'Flood & Waterlogging Risk',
+    heatStressRisk: 'Heat Wave Risk',
+    diseaseRisk: 'Foliar Disease Risk',
     waterStressRisk: 'Water Stress Risk',
+    liveWeatherTitle: 'Live Weather & Atmospheric Telemetry',
+    sevenDayForecast: '7-Day Climate & Rainfall Forecast',
+    rainForecast: '48h Rain Forecast',
+    riverDischarge: 'Peak River Discharge',
+    waterBalance: '7-Day Water Balance (P - ET₀)',
+    daysWaterReserve: 'Days of Soil Water Reserve',
+    floodModel: 'Copernicus GloFAS + Soil Saturation Runoff Model',
+    droughtModel: 'FAO-56 SPEI & Root Zone Moisture Model',
+    heatWaveModel: 'IMD Agro-Meteorological Heat Wave Model',
+    diseaseModel: 'Wallin & Mills Microclimate Spore Model',
+    agroAdvisoryTitle: 'Agro-Climatic Advisory & Field Actions',
+    precipitationProbability: 'Rain Probability',
+    soilSaturationRunoff: 'Surface Runoff Risk',
+    evapotranspiration: 'Evapotranspiration',
+    apparentTemp: 'Apparent (Feels Like)',
+    windSpeedLabel: 'Wind Speed',
+    glofasRiverDischarge: 'GloFAS River Discharge',
 
     startMission: 'START MISSION',
     pause: 'PAUSE',
@@ -328,10 +362,27 @@ export const translations: Record<Language, Translations> = {
     resolved: 'हल किया गया',
 
     droughtRisk: 'सूखे का खतरा',
-    floodRisk: 'जलभराव / बाढ़ का खतरा',
-    heatStressRisk: 'अत्यधिक गर्मी का खतरा',
-    diseaseRisk: 'फसल रोग का खतरा',
+    floodRisk: 'जलभराव एवं बाढ़ का खतरा',
+    heatStressRisk: 'लू / अत्यधिक गर्मी का खतरा',
+    diseaseRisk: 'पत्तियों में फंगल रोग का खतरा',
     waterStressRisk: 'पानी की कमी का खतरा',
+    liveWeatherTitle: 'लाइव मौसम एवं उपग्रह जानकारी',
+    sevenDayForecast: '7-दिवसीय मौसम एवं वर्षा पूर्वानुमान',
+    rainForecast: '48 घंटे में वर्षा का अनुमान',
+    riverDischarge: 'नदी जल बहाव (GloFAS)',
+    waterBalance: '7 दिनों का जल संतुलन (P - ET₀)',
+    daysWaterReserve: 'मिट्टी में जल संचित दिवस',
+    floodModel: 'कॉपरनिकस ग्लोफास + मिट्टी जलभराव मॉडल',
+    droughtModel: 'एफएओ-56 एसपीईआई एवं जड़ नमी मॉडल',
+    heatWaveModel: 'भारतीय मौसम विभाग (IMD) लू मॉडल',
+    diseaseModel: 'वैलिन-मिल्स माइक्रोक्लाइमेट फंगल मॉडल',
+    agroAdvisoryTitle: 'कृषि-मौसम सलाह एवं तत्काल कार्य',
+    precipitationProbability: 'बारिश की संभावना',
+    soilSaturationRunoff: 'सतही बहाव जोखिम',
+    evapotranspiration: 'वाष्पोत्सर्जन',
+    apparentTemp: 'अनुभूत तापमान',
+    windSpeedLabel: 'हवा की गति',
+    glofasRiverDischarge: 'ग्लोफास नदी जल प्रवाह',
 
     startMission: 'निरीक्षण शुरू करें',
     pause: 'रोकें',
@@ -449,10 +500,27 @@ export const translations: Record<Language, Translations> = {
     resolved: 'निवारण झाले',
 
     droughtRisk: 'दुष्काळ जोखीम',
-    floodRisk: 'अतिवृष्टी / पूर जोखीम',
-    heatStressRisk: 'उष्णतेचा ताण',
-    diseaseRisk: 'रोग प्रादुर्भाव जोखीम',
+    floodRisk: 'अतिवृष्टी व पूर जोखीम',
+    heatStressRisk: 'उष्णतेची लाट जोखीम',
+    diseaseRisk: 'पानावरील बुरशीजन्य रोग जोखीम',
     waterStressRisk: 'पाण्याचा ताण',
+    liveWeatherTitle: 'थेट हवामान व उपग्रह माहिती',
+    sevenDayForecast: '७-दिवसीय हवामान व पाऊस अंदाज',
+    rainForecast: '४८ तासांत पावसाचा अंदाज',
+    riverDischarge: 'नदी पात्रातील विसर्ग (GloFAS)',
+    waterBalance: '७ दिवसांचे जल संतुलन (P - ET₀)',
+    daysWaterReserve: 'मातीतील पाणी साठा दिवस',
+    floodModel: 'कॉपरनिकस ग्लोफास + माती पाणी साठा मॉडेल',
+    droughtModel: 'एफएओ-५६ दुष्काळ व मुळांचा ओलावा मॉडेल',
+    heatWaveModel: 'भारतीय हवामान विभाग (IMD) उष्णता मॉडेल',
+    diseaseModel: 'वॅलिन-मिल्स सूक्ष्महवामान बुरशी मॉडेल',
+    agroAdvisoryTitle: 'हवामान आधारित शेतकरी सल्ला व कृती',
+    precipitationProbability: 'पावसाची शक्यता',
+    soilSaturationRunoff: 'पृष्ठभागावरील पाण्याचा निचरा जोखीम',
+    evapotranspiration: 'बाष्पीभवन',
+    apparentTemp: 'जाणवणारे तापमान',
+    windSpeedLabel: 'वाऱ्याचा वेग',
+    glofasRiverDischarge: 'ग्लोफास नदी विसर्ग',
 
     startMission: 'तपासणी सुरू करा',
     pause: 'थांबवा',

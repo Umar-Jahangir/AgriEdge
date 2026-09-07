@@ -35,6 +35,7 @@ from app.schemas.api import (
 )
 from app.services.demo_data import get_all_demo_zones, get_demo_zone
 from app.services.inference import inference_service
+from app.services.weather import live_weather_service
 from app.sensors.validator import SensorValidator
 
 router = APIRouter()
@@ -269,20 +270,52 @@ def crop_analysis(db: Session = Depends(get_db)):
   ]
 
 
-@router.get("/environmental-risk")
-def environmental_risk():
+@router.get("/weather/live")
+async def live_weather(lat: float | None = None, lon: float | None = None):
+  """Returns live weather, 7-day forecast, GloFAS river discharge, and agro-climatic predictions."""
+  weather = await live_weather_service.get_live_weather(lat, lon)
+  flood = await live_weather_service.get_flood_forecast(lat, lon)
   zone = get_demo_zone("ZONE_B")
+  predictions = live_weather_service.predict_risks(
+    weather=weather,
+    flood=flood,
+    soil_moisture=zone.get("soil_moisture", 28.0),
+    soil_temp=zone.get("soil_temperature", 24.0),
+  )
+  return predictions
+
+
+@router.get("/environmental-risk")
+async def environmental_risk(lat: float | None = None, lon: float | None = None):
+  """Aggregates in-situ rover sensors with live Open-Meteo & GloFAS agro-meteorological models."""
+  zone = get_demo_zone("ZONE_B")
+  weather = await live_weather_service.get_live_weather(lat, lon)
+  flood = await live_weather_service.get_flood_forecast(lat, lon)
+  predictions = live_weather_service.predict_risks(
+    weather=weather,
+    flood=flood,
+    soil_moisture=zone.get("soil_moisture", 28.0),
+    soil_temp=zone.get("soil_temperature", 24.0),
+  )
+  current = predictions.get("current_weather", {})
+  preds = predictions.get("predictions", {})
+
   return {
-    "drought_risk": "MEDIUM",
-    "flood_risk": "LOW",
-    "heat_stress_risk": "HIGH",
-    "crop_disease_risk": "MEDIUM",
-    "water_stress_risk": "MEDIUM",
-    "air_temperature": zone["air_temperature"],
-    "humidity": zone["humidity"],
+    "drought_risk": preds.get("drought", {}).get("severity", "MEDIUM"),
+    "flood_risk": preds.get("flood", {}).get("severity", "LOW"),
+    "heat_stress_risk": preds.get("heat_stress", {}).get("severity", "MEDIUM"),
+    "crop_disease_risk": preds.get("foliar_disease", {}).get("severity", "LOW"),
+    "water_stress_risk": preds.get("water_stress", {}).get("severity", "MEDIUM"),
+    "air_temperature": current.get("temperature", zone["air_temperature"]),
+    "humidity": current.get("humidity", zone["humidity"]),
     "soil_temperature": zone["soil_temperature"],
     "soil_moisture": zone["soil_moisture"],
-    "weather_integration_pending": True,
+    "weather_integration_pending": False,
+    "current_weather": current,
+    "predictions": preds,
+    "daily_forecast": predictions.get("daily_forecast", []),
+    "advisories": predictions.get("advisories", {}),
+    "source": predictions.get("source", "Open-Meteo & GloFAS"),
     "timestamp": datetime.utcnow().isoformat(),
   }
 
