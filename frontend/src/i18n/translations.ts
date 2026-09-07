@@ -17,6 +17,21 @@ export interface Translations {
 
   // Workstation Header
   workstationTitle: string;
+  smartAssistant: string;
+  farmOverview: string;
+  farmOverviewSubtitle: string;
+  farmCondition: string;
+  roverOnline: string;
+  roverOffline: string;
+  soilHealthIndexTitle: string;
+  soilHealthExplanation: string;
+  healthyTarget: string;
+  fieldTemperature: string;
+  soilAcidity: string;
+  salinityEC: string;
+  nutrientsTitle: string;
+  todayActionPlan: string;
+  farmMapAndPath: string;
   site: string;
   roverStatus: string;
   connected: string;
@@ -133,19 +148,34 @@ export const translations: Record<Language, Translations> = {
     settings: 'Settings',
     logout: 'Logout',
 
-    workstationTitle: 'AGRIEDGE // AUTONOMOUS ROVER WORKSTATION',
-    site: 'SITE',
-    roverStatus: 'ROVER',
-    connected: 'CONNECTED',
-    offline: 'OFFLINE',
-    sync: 'SYNC',
-    prototype: 'PROTOTYPE',
+    workstationTitle: 'AgriEdge',
+    smartAssistant: 'Smart Farming Assistant',
+    farmOverview: 'Farm Health Overview',
+    farmOverviewSubtitle: 'Live soil, crop & weather telemetry from your AgriEdge Rover',
+    farmCondition: 'Farm Condition',
+    roverOnline: 'Rover Online',
+    roverOffline: 'Rover Offline',
+    soilHealthIndexTitle: 'Soil Health Score',
+    soilHealthExplanation: 'Synthesized from soil moisture, pH, and essential nutrients (N-P-K)',
+    healthyTarget: 'Healthy Target',
+    fieldTemperature: 'Field Temperature',
+    soilAcidity: 'Soil Acidity (pH)',
+    salinityEC: 'Salinity (EC)',
+    nutrientsTitle: 'Soil Nutrients (NPK)',
+    todayActionPlan: "Today's Action Plan & Farmer Advisory",
+    farmMapAndPath: 'Farm Map & Rover Path',
+    site: 'Farm',
+    roverStatus: 'Rover',
+    connected: 'Online',
+    offline: 'Offline',
+    sync: 'Sync',
+    prototype: 'Active',
 
-    fieldTopography: 'FIELD TOPOGRAPHY & ROVER TRAJECTORY',
-    actionablePrescriptions: 'ACTIONABLE FIELD PRESCRIPTIONS',
-    coordinateGridTitle: 'FIELD COORDINATE GRID',
-    samplingArrayTitle: 'AUTONOMOUS ROVER SAMPLING ARRAY',
-    aiFused: 'AI FUSED',
+    fieldTopography: 'Farm Map & Rover Path',
+    actionablePrescriptions: "Today's Action Plan & Farmer Advisory",
+    coordinateGridTitle: 'Field Coordinate Grid',
+    samplingArrayTitle: 'Rover Sampling Locations',
+    aiFused: 'Edge AI Verified',
 
     sectorNW: 'SECTOR A // NW',
     sectorNE: 'SECTOR B // NE',
@@ -239,19 +269,34 @@ export const translations: Record<Language, Translations> = {
     settings: 'सेटिंग्स',
     logout: 'लॉगआउट',
 
-    workstationTitle: 'एग्री-एज // स्वायत्त रोवर स्टेशन',
+    workstationTitle: 'एग्री-एज',
+    smartAssistant: 'स्मार्ट कृषि सहायक',
+    farmOverview: 'खेत और फसल की स्थिति',
+    farmOverviewSubtitle: 'आपके एग्री-एज रोवर द्वारा खेत, मिट्टी और फसल की लाइव जानकारी',
+    farmCondition: 'खेत की स्थिति',
+    roverOnline: 'रोवर ऑनलाइन (सक्रिय)',
+    roverOffline: 'रोवर ऑफलाइन',
+    soilHealthIndexTitle: 'मृदा स्वास्थ्य स्कोर',
+    soilHealthExplanation: 'मिट्टी की नमी, पीएच और मुख्य पोषक तत्वों (NPK) के आधार पर',
+    healthyTarget: 'उचित स्तर',
+    fieldTemperature: 'खेत का तापमान',
+    soilAcidity: 'मिट्टी का पीएच (pH)',
+    salinityEC: 'लवणता (EC)',
+    nutrientsTitle: 'मिट्टी के पोषक तत्व (NPK)',
+    todayActionPlan: 'आज के जरूरी कार्य एवं कृषि सलाह',
+    farmMapAndPath: 'खेत का नक्शा और रोवर मार्ग',
     site: 'खेत',
     roverStatus: 'रोवर',
-    connected: 'जुड़ा हुआ है',
+    connected: 'सक्रिय',
     offline: 'ऑफलाइन',
     sync: 'सिंक',
-    prototype: 'प्रोटोटाइप',
+    prototype: 'सक्रिय',
 
-    fieldTopography: 'खेत की स्थलाकृति और रोवर पथ',
-    actionablePrescriptions: 'किसान सलाह एवं उपचार निर्देश',
-    coordinateGridTitle: 'खेत निर्देशांक ग्रिड',
-    samplingArrayTitle: 'स्वायत्त रोवर नमूना जांच प्रणाली',
-    aiFused: 'एआई द्वारा प्रमाणित',
+    fieldTopography: 'खेत का नक्शा और रोवर मार्ग',
+    actionablePrescriptions: 'आज के जरूरी कार्य एवं कृषि सलाह',
+    coordinateGridTitle: 'खेत ग्रिड',
+    samplingArrayTitle: 'रोवर जांच बिंदु',
+    aiFused: 'एआई द्वारा सत्यापित',
 
     sectorNW: 'जोन A // उत्तर-पश्चिम',
     sectorNE: 'जोन B // उत्तर-पूर्व',
@@ -345,19 +390,34 @@ export const translations: Record<Language, Translations> = {
     settings: 'सेटिंग्ज',
     logout: 'बाहेर पडा',
 
-    workstationTitle: 'अ‍ॅग्री-एज // स्वयंचलित रोव्हर केंद्र',
+    workstationTitle: 'अ‍ॅग्री-एज',
+    smartAssistant: 'स्मार्ट शेती सहाय्यक',
+    farmOverview: 'शेताची सद्यस्थिती',
+    farmOverviewSubtitle: 'तुमच्या अ‍ॅग्री-एज रोव्हरद्वारे शेत, माती आणि पिकांची थेट माहिती',
+    farmCondition: 'शेताची स्थिती',
+    roverOnline: 'रोव्हर ऑनलाइन (सुरू)',
+    roverOffline: 'रोव्हर ऑफलाइन',
+    soilHealthIndexTitle: 'माती आरोग्य निर्देशांक',
+    soilHealthExplanation: 'मातीतील ओलावा, सामू (pH) आणि पोषक घटकांच्या (NPK) आधारे',
+    healthyTarget: 'योग्य प्रमाण',
+    fieldTemperature: 'शेताचे तापमान',
+    soilAcidity: 'मातीचा सामू (pH)',
+    salinityEC: 'क्षारता (EC)',
+    nutrientsTitle: 'मातीतील पोषक घटक (NPK)',
+    todayActionPlan: 'आजच्या महत्त्वाच्या कृती व शेतकरी सल्ला',
+    farmMapAndPath: 'शेताचा नकाशा आणि रोव्हर मार्ग',
     site: 'शेत',
     roverStatus: 'रोव्हर',
-    connected: 'जोडलेले आहे',
+    connected: 'सुरू',
     offline: 'ऑफलाइन',
     sync: 'सिंक',
-    prototype: 'प्रोटोटाइप',
+    prototype: 'सुरू',
 
-    fieldTopography: 'शेताची रचना आणि रोव्हर मार्ग',
-    actionablePrescriptions: 'शेतकरी सल्ला व उपाययोजना',
-    coordinateGridTitle: 'शेत निर्देशांक ग्रिड',
-    samplingArrayTitle: 'स्वयंचलित रोव्हर नमुना तपासणी',
-    aiFused: 'एआय आधारित',
+    fieldTopography: 'शेताचा नकाशा आणि रोव्हर मार्ग',
+    actionablePrescriptions: 'आजच्या महत्त्वाच्या कृती व शेतकरी सल्ला',
+    coordinateGridTitle: 'शेत ग्रिड',
+    samplingArrayTitle: 'रोव्हर तपासणी बिंदू',
+    aiFused: 'एआय द्वारे प्रमाणित',
 
     sectorNW: 'झोन A // वायव्य',
     sectorNE: 'झोन B // ईशान्य',
