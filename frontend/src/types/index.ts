@@ -343,3 +343,35 @@ export interface YieldRiskForecast {
   };
   timestamp: string;
 }
+
+export interface SMSDispatchRequest {
+  phoneNumber: string;
+  recipientName?: string;
+  channel: 'SMS' | 'WHATSAPP';
+  language: 'en' | 'hi' | 'mr';
+  messageText: string;
+  alertId?: string;
+  zoneId?: string;
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  fast2smsApiKey?: string;
+  callmebotApiKey?: string;
+}
+
+
+export interface SMSDispatchResponse {
+  status: string;
+  channel: string;
+  recipientName: string;
+  phoneNumber: string;
+  operator: string;
+  referenceId: string;
+  charCount: number;
+  smsParts: number;
+  costInr: number;
+  deliveredAt: string;
+  payloadPreview: string;
+  liveDispatched?: boolean;
+  whatsappUrl?: string;
+  smsUri?: string;
+}
+

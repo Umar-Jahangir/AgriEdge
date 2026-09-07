@@ -2,12 +2,14 @@ import type { Alert } from '../../types';
 import { SeverityBadge } from '../ui/StatusBadge';
 import { formatTimestamp } from '../../utils/format';
 import { cn } from '../../utils/cn';
+import { Radio } from 'lucide-react';
 
 interface AlertRowProps {
   alert: Alert;
+  onDispatch?: (alert: Alert) => void;
 }
 
-export function AlertRow({ alert }: AlertRowProps) {
+export function AlertRow({ alert, onDispatch }: AlertRowProps) {
   const isCritical = alert.severity === 'CRITICAL';
   const isHigh = alert.severity === 'HIGH';
 
@@ -37,7 +39,18 @@ export function AlertRow({ alert }: AlertRowProps) {
         </div>
       </div>
 
-      <div className="self-start sm:self-center">
+      <div className="flex items-center gap-2 self-start sm:self-center">
+        {onDispatch && (
+          <button
+            type="button"
+            onClick={() => onDispatch(alert)}
+            className="inline-flex items-center gap-1 border border-earth-300 bg-earth-50 px-2 py-1 text-[11px] font-semibold text-earth-800 hover:bg-farm-50 hover:border-farm-700 hover:text-farm-950 transition-colors cursor-pointer"
+            title="Dispatch via 2G SMS"
+          >
+            <Radio className="h-3 w-3 text-farm-700" />
+            <span>2G SMS</span>
+          </button>
+        )}
         <span
           className={cn(
             'inline-flex border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider',
@@ -52,3 +65,4 @@ export function AlertRow({ alert }: AlertRowProps) {
     </div>
   );
 }
+

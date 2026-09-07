@@ -14,6 +14,8 @@ import { RoverPage } from './pages/RoverPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { IncomingAlertToast } from './components/alerts/IncomingAlertToast';
+
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -62,8 +64,10 @@ export default function App() {
             </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
+          <IncomingAlertToast />
         </BrowserRouter>
       </LanguageProvider>
+
     </AuthProvider>
   );
 }

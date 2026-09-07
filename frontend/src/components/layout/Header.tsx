@@ -1,8 +1,10 @@
-import { Menu, Bell, User, LogOut, Sprout } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, Bell, User, LogOut, Sprout, Radio } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { useNavigate } from 'react-router-dom';
+import { SmsDispatcherModal } from '../alerts/SmsDispatcherModal';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -15,6 +17,7 @@ export function Header({ onMenuClick, farmName = 'Patil Farm', roverConnected = 
   const { logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -23,6 +26,7 @@ export function Header({ onMenuClick, farmName = 'Patil Farm', roverConnected = 
 
   return (
     <header className="sticky top-0 z-30 border-b border-earth-300 bg-white">
+
       <div className="flex items-center justify-between px-4 py-2.5 lg:px-6">
         {/* Left: Branding & Farm Context */}
         <div className="flex items-center gap-3">
@@ -76,9 +80,21 @@ export function Header({ onMenuClick, farmName = 'Patil Farm', roverConnected = 
           {/* Clean Segmented Language Switcher */}
           <LanguageToggle />
 
+          {/* 2G SMS / Keypad Dispatcher (PS §6) */}
+          <button
+            type="button"
+            onClick={() => setIsSmsModalOpen(true)}
+            className="inline-flex items-center gap-1.5 border border-farm-700 bg-farm-50 px-2.5 py-1.5 text-xs font-bold text-farm-900 hover:bg-farm-100 hover:border-farm-900 transition-colors shadow-xs cursor-pointer"
+            title={t('dispatchAlertButton')}
+          >
+            <Radio className="h-3.5 w-3.5 text-farm-700 animate-pulse" />
+            <span className="hidden sm:inline">{t('dispatchAlertButton')}</span>
+            <span className="sm:hidden">2G SMS</span>
+          </button>
+
           {/* Notification Alert */}
           <button
-            className="relative border border-earth-300 p-2 hover:bg-earth-100 text-earth-700"
+            className="relative border border-earth-300 p-2 hover:bg-earth-100 text-earth-700 cursor-pointer"
             title="Alerts"
           >
             <Bell className="h-4 w-4" />
@@ -87,7 +103,7 @@ export function Header({ onMenuClick, farmName = 'Patil Farm', roverConnected = 
 
           {/* Farmer Profile */}
           <button
-            className="border border-earth-300 p-2 hover:bg-earth-100 text-earth-700"
+            className="border border-earth-300 p-2 hover:bg-earth-100 text-earth-700 cursor-pointer"
             title="Profile"
           >
             <User className="h-4 w-4" />
@@ -96,7 +112,7 @@ export function Header({ onMenuClick, farmName = 'Patil Farm', roverConnected = 
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="hidden sm:inline-flex items-center gap-1.5 border border-earth-300 px-2.5 py-1.5 text-xs font-medium text-earth-700 hover:bg-earth-100 hover:text-earth-950"
+            className="hidden sm:inline-flex items-center gap-1.5 border border-earth-300 px-2.5 py-1.5 text-xs font-medium text-earth-700 hover:bg-earth-100 hover:text-earth-950 cursor-pointer"
             title={t('logout')}
           >
             <LogOut className="h-3.5 w-3.5" />
@@ -104,6 +120,13 @@ export function Header({ onMenuClick, farmName = 'Patil Farm', roverConnected = 
           </button>
         </div>
       </div>
+
+      {/* 2G Keypad & SMS Dispatcher Modal */}
+      <SmsDispatcherModal
+        isOpen={isSmsModalOpen}
+        onClose={() => setIsSmsModalOpen(false)}
+      />
     </header>
   );
 }
+

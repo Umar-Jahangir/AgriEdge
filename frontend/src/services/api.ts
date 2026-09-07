@@ -37,11 +37,14 @@ import type {
   RelayState,
   RoverStatus,
   SensorReading,
+  SMSDispatchRequest,
+  SMSDispatchResponse,
   SoilAnalysis,
   SystemStatus,
   TimeRange,
   YieldRiskForecast,
 } from '../types';
+
 
 export interface SensorHistoryData {
   soilMoisture: HistoricalDataPoint[];
@@ -353,4 +356,59 @@ export const api = {
     }
     return fetchAPI<YieldRiskForecast>(API_CONFIG.ENDPOINTS.YIELD_RISK);
   },
+
+  async dispatchSMSAlert(req: SMSDispatchRequest): Promise<SMSDispatchResponse> {
+    const rawDigits = req.phoneNumber.replace(/\D/g, '');
+    const cleanPhone = rawDigits.length === 10 ? `91${rawDigits}` : rawDigits;
+    const encoded = encodeURIComponent(req.messageText);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encoded}`;
+    const smsUri = `sms:+${cleanPhone}?body=${encoded}`;
+
+    if (API_CONFIG.USE_MOCK) {
+      await delay(350);
+      const isUnicode = req.messageText.split('').some((c) => c.charCodeAt(0) > 127);
+      const charCount = req.messageText.length;
+      const smsParts = isUnicode ? Math.max(1, Math.ceil(charCount / 70)) : Math.max(1, Math.ceil(charCount / 160));
+      return {
+        status: 'DELIVERED',
+        channel: req.channel,
+        recipientName: req.recipientName || 'Ramesh Patil',
+        phoneNumber: req.phoneNumber,
+        operator: req.channel === 'SMS' ? 'Jio / BSNL 2G GSM (mKisan Gateway)' : 'WhatsApp Business Cloud Gateway',
+        referenceId: `TXN-${Math.floor(10000 + Math.random() * 90000)}-BSNL-IN`,
+        charCount,
+        smsParts,
+        costInr: Number((smsParts * 0.12).toFixed(2)),
+        deliveredAt: new Date().toISOString(),
+        payloadPreview: req.messageText,
+        liveDispatched: false,
+        whatsappUrl,
+        smsUri,
+      };
+    }
+    return postAPI<SMSDispatchResponse>(API_CONFIG.ENDPOINTS.SMS_DISPATCH, {
+      phone_number: req.phoneNumber,
+      recipient_name: req.recipientName,
+      channel: req.channel,
+      language: req.language,
+      message_text: req.messageText,
+      alert_id: req.alertId,
+      zone_id: req.zoneId,
+      priority: req.priority,
+      fast2sms_api_key: req.fast2smsApiKey,
+      callmebot_api_key: req.callmebotApiKey,
+    });
+  },
+
+  async getLiveAlertDispatch(): Promise<{ dispatchId?: string; payloadPreview?: string; phoneNumber?: string; channel?: string; receivedAt?: string } | null> {
+    if (API_CONFIG.USE_MOCK) return null;
+    try {
+      return await fetchAPI(API_CONFIG.ENDPOINTS.LIVE_DISPATCH);
+    } catch {
+      return null;
+    }
+  },
 };
+
+
+

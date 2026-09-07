@@ -189,7 +189,31 @@ export interface Translations {
   stageSeedling: string;
   spotSprayingSavingsBadge: string;
   earlyInterventionBadge: string;
+
+  // 2G SMS & WhatsApp Dispatcher (PS §6)
+  smsDispatcherTitle: string;
+  smsDispatcherSubtitle: string;
+  dispatchAlertButton: string;
+  featurePhonePreview: string;
+  channelSMS: string;
+  channelWhatsApp: string;
+  recipientFarmer: string;
+  phoneNumberLabel: string;
+  messageContentLabel: string;
+  sendAlertBtn: string;
+  sendingAlertBtn: string;
+  alertSentSuccess: string;
+  operatorReceiptTitle: string;
+  txnRefLabel: string;
+  smsPartsLabel: string;
+  estimatedCostLabel: string;
+  simulatedDeviceTitle: string;
+  selectAlertPreset: string;
+  presetBlight: string;
+  presetWater: string;
+  presetRain: string;
 }
+
 
 export const translations: Record<Language, Translations> = {
   en: {
@@ -367,7 +391,30 @@ export const translations: Record<Language, Translations> = {
     stageSeedling: 'Seedling / Emergence',
     spotSprayingSavingsBadge: 'Targeted Spot-Spraying',
     earlyInterventionBadge: 'Early In-Situ Diagnosis',
+
+    smsDispatcherTitle: '2G Keypad / SMS Alert Dispatcher',
+    smsDispatcherSubtitle: 'Deliver offline agronomic alerts to basic keypad & feature phones (mKisan 51969 Standard)',
+    dispatchAlertButton: 'Dispatch 2G/SMS Alert',
+    featurePhonePreview: 'Feature Phone Preview (JioPhone / 2G Nokia)',
+    channelSMS: '2G GSM SMS (Telecom)',
+    channelWhatsApp: 'WhatsApp Business',
+    recipientFarmer: 'Recipient Farmer',
+    phoneNumberLabel: 'Mobile Number',
+    messageContentLabel: 'SMS Payload (Devanagari Unicode)',
+    sendAlertBtn: 'Transmit Alert via Gateway',
+    sendingAlertBtn: 'Broadcasting to GSM Tower...',
+    alertSentSuccess: 'Alert Dispatched Successfully!',
+    operatorReceiptTitle: 'Telecom Gateway Delivery Receipt',
+    txnRefLabel: 'Transaction Ref',
+    smsPartsLabel: 'SMS Segments (70 chars/part)',
+    estimatedCostLabel: 'Carrier Cost',
+    simulatedDeviceTitle: 'Simulated 2G Handset',
+    selectAlertPreset: 'Load Alert Scenario',
+    presetBlight: 'Zone C: Early Blight Infection Alert',
+    presetWater: 'Zone B: Soil Moisture Deficit',
+    presetRain: 'All Zones: 48h Heavy Rain Hold Irrigation',
   },
+
 
   hi: {
     dashboard: 'डैशबोर्ड',
@@ -544,7 +591,30 @@ export const translations: Record<Language, Translations> = {
     stageSeedling: 'अंकुरण / पौधा अवस्था',
     spotSprayingSavingsBadge: 'सटीक लक्षित छिड़काव',
     earlyInterventionBadge: 'समय पर रोग निदान',
+
+    smsDispatcherTitle: 'कीपैड फोन एसएमएस एवं व्हाट्सएप अलर्ट सिस्टम',
+    smsDispatcherSubtitle: 'साधारण 2G कीपैड फोन (नोकिया / जियोफोन) पर कृषि अलर्ट भेजें (mKisan 51969 मानक)',
+    dispatchAlertButton: '2G/एसएमएस अलर्ट भेजें',
+    featurePhonePreview: 'साधारण फोन स्क्रीन (जियोफोन / नोकिया 2G)',
+    channelSMS: '2G जीएसएम एसएमएस',
+    channelWhatsApp: 'व्हाट्सएप संदेश',
+    recipientFarmer: 'प्राप्तकर्ता किसान',
+    phoneNumberLabel: 'मोबाइल नंबर',
+    messageContentLabel: 'एसएमएस संदेश (देवनागरी यूनिकोड)',
+    sendAlertBtn: 'टेलीकॉम गेटवे से अलर्ट भेजें',
+    sendingAlertBtn: 'जीएसएम टावर से प्रसारण जारी...',
+    alertSentSuccess: 'अलर्ट सफलतापूर्वक प्रेषित!',
+    operatorReceiptTitle: 'टेलीकॉम ऑपरेटर डिलीवरी रसीद',
+    txnRefLabel: 'लेनदेन संदर्भ संख्या (TXN)',
+    smsPartsLabel: 'एसएमएस भाग (70 अक्षर/भाग)',
+    estimatedCostLabel: 'अनुमानित शुल्क',
+    simulatedDeviceTitle: 'कीपैड मोबाइल सिम्युलेटर',
+    selectAlertPreset: 'अलर्ट संदेश चुनें',
+    presetBlight: 'जोन C: अगेती झुलसा रोग चेतावनी',
+    presetWater: 'जोन B: मृदा नमी की कमी - ड्रिप सिंचाई',
+    presetRain: 'सभी जोन: 48 घंटे में भारी वर्षा का अनुमान',
   },
+
 
   mr: {
     dashboard: 'डॅशबोर्ड',
@@ -721,7 +791,30 @@ export const translations: Record<Language, Translations> = {
     stageSeedling: 'रोपांची अवस्था',
     spotSprayingSavingsBadge: 'सटीक ठराविक फवारणी',
     earlyInterventionBadge: 'वेळेवर रोग निदान',
+
+    smsDispatcherTitle: 'कीपॅड फोन एसएमएस व व्हॉट्सअ‍ॅप अलर्ट यंत्रणा',
+    smsDispatcherSubtitle: 'साध्या 2G कीपॅड फोनवर (नोकिया / जिओफोन) कृषी इशारे पाठवा (mKisan 51969 मानक)',
+    dispatchAlertButton: '2G/एसएमएस इशारा पाठवा',
+    featurePhonePreview: 'साध्या फोनची स्क्रीन (जिओफोन / नोकिया 2G)',
+    channelSMS: '2G जीएसएम एसएमएस',
+    channelWhatsApp: 'व्हॉट्सअ‍ॅप संदेश',
+    recipientFarmer: 'शेतकऱ्याचे नाव',
+    phoneNumberLabel: 'मोबाईल क्रमांक',
+    messageContentLabel: 'एसएमएस मजकूर (देवनागरी युनिकोड)',
+    sendAlertBtn: 'टेलिकॉम गेटवेवरून संदेश पाठवा',
+    sendingAlertBtn: 'जीएसएम टॉवरवरून संदेश जात आहे...',
+    alertSentSuccess: 'इशारा यशस्वीरीत्या पाठवला!',
+    operatorReceiptTitle: 'टेलिकॉम ऑपरेटर डिलिव्हरी पावती',
+    txnRefLabel: 'व्यवहार संदर्भ क्रमांक (TXN)',
+    smsPartsLabel: 'एसएमएस भाग (70 अक्षरे/भाग)',
+    estimatedCostLabel: 'अंदाजित खर्च',
+    simulatedDeviceTitle: 'कीपॅड मोबाईल सिम्युलेटर',
+    selectAlertPreset: 'इशारा निवडा',
+    presetBlight: 'झोन C: करपा रोगाचा प्रादुर्भाव इशारा',
+    presetWater: 'झोन B: मातीतील ओलावा कमी - ठिबक सिंचन',
+    presetRain: 'सर्व झोन: 48 तासांत मुसळधार पाऊस अंदाज',
   },
+
 };
 
 /** Dynamic Agronomic Content Translators **/

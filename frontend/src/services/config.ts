@@ -26,5 +26,9 @@ export const API_CONFIG = {
     IRRIGATION_SCHEDULE: '/api/irrigation/schedule',
     IRRIGATION_VALVE: '/api/irrigation/valve',
     YIELD_RISK: '/api/yield-risk',
+    SMS_DISPATCH: '/api/alerts/dispatch-sms',
+    LIVE_DISPATCH: '/api/alerts/live-dispatch',
   },
 } as const;
+
+

@@ -259,3 +259,33 @@ class YieldRiskResponse(BaseModel):
     zones: list[ZoneYieldRisk]
     decision_insights: dict[str, str]
     timestamp: str
+
+
+class SMSDispatchRequest(BaseModel):
+    phone_number: str
+    channel: str = "SMS"  # "SMS" | "WHATSAPP"
+    language: str = "hi"  # "hi" | "mr" | "en"
+    message_text: str
+    recipient_name: str | None = "Ramesh Patil"
+    alert_id: str | None = None
+    fast2sms_api_key: str | None = None
+    callmebot_api_key: str | None = None
+
+
+
+class SMSDispatchResponse(BaseModel):
+    status: str
+    channel: str
+    recipient_name: str
+    phone_number: str
+    operator: str
+    reference_id: str
+    char_count: int
+    sms_parts: int
+    cost_inr: float
+    delivered_at: str
+    payload_preview: str
+    live_dispatched: bool = False
+    whatsapp_url: str | None = None
+    sms_uri: str | None = None
+

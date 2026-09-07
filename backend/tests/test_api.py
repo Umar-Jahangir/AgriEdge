@@ -124,3 +124,27 @@ def test_zone_growth_stages_in_zones_endpoint():
     assert "yield_risk_pct" in z
 
 
+def test_dispatch_sms_alert():
+  payload = {
+    "phone_number": "+919822012345",
+    "recipient_name": "Ramesh Patil",
+    "channel": "SMS",
+    "language": "hi",
+    "message_text": "[Kisan Alert] जोन B में फंगल रोग का खतरा। तुरंत जैविक छिड़काव करें।",
+    "alert_id": "alert-test-1",
+    "zone_id": "ZONE_B",
+    "priority": "HIGH"
+  }
+  r = client.post("/api/alerts/dispatch-sms", json=payload)
+  assert r.status_code == 200
+  data = r.json()
+  assert data["status"] == "DELIVERED"
+  assert data["channel"] == "SMS"
+  assert data["recipient_name"] == "Ramesh Patil"
+  assert "BSNL-IN" in data["reference_id"]
+  assert data["sms_parts"] >= 1
+  assert data["cost_inr"] > 0
+  assert "Kisan Alert" in data["payload_preview"]
+
+
+
