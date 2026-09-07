@@ -6,7 +6,7 @@ export type TimeRange = 'today' | '7d' | '30d' | '90d';
 export type AlertFilter = 'all' | 'critical' | 'high' | 'medium' | 'low' | 'resolved';
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 export type NutrientStatus = 'Good' | 'Moderate' | 'Low' | 'Deficient';
-export type CropHealthStatus = 'Healthy' | 'Possible Disease Detected' | 'Possible Nutrient Deficiency' | 'Water Stress';
+export type CropHealthStatus = 'Healthy' | 'Possible Disease Detected' | 'Possible Nutrient Deficiency' | 'Water Stress' | 'Pest Infestation Detected';
 export type ConnectionStatus = 'Connected' | 'Disconnected' | 'Degraded';
 
 export interface SensorReading {
@@ -56,6 +56,22 @@ export interface CropAnalysis {
   cropHealthPercent: number;
   zoneId: string;
   notes?: string;
+  modelType?: 'disease' | 'pest';
+  pestName?: string;
+  hindiName?: string;
+  marathiName?: string;
+  severity?: string;
+  treatment?: string;
+  topK?: Array<{
+    index: number;
+    name: string;
+    pretty: string;
+    crop?: string;
+    confidence: number;
+    hindi?: string;
+    marathi?: string;
+    treatment?: string;
+  }>;
 }
 
 export interface Recommendation {

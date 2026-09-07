@@ -102,6 +102,10 @@ class VisionPrediction(BaseModel):
     top_k: list[dict[str, Any]] | None = None
     bbox: list[float] | None = None
     note: str | None = None
+    pest_name: str | None = None
+    hindi_name: str | None = None
+    marathi_name: str | None = None
+    severity: str | None = None
 
 
 class AIAnalysisResult(BaseModel):

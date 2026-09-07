@@ -165,9 +165,33 @@ export const api = {
     }));
   },
 
-  async uploadCropImage(file: File, zoneId = 'ZONE_B'): Promise<CropAnalysis> {
+  async uploadCropImage(file: File, zoneId = 'ZONE_B', scanType: 'disease' | 'pest' | 'auto' = 'disease'): Promise<CropAnalysis> {
     if (API_CONFIG.USE_MOCK) {
       await delay(600);
+      if (scanType === 'pest') {
+        return {
+          id: `scan-mock-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          imageUrl: URL.createObjectURL(file),
+          diseaseDetection: 'Rice: Rice Leaf Roller',
+          confidence: 94,
+          cropHealth: 'Pest Infestation Detected',
+          cropHealthPercent: 62,
+          zoneId,
+          modelType: 'pest',
+          pestName: 'Rice Leaf Roller',
+          hindiName: 'चावल का पत्ता लपेटक',
+          marathiName: 'भाताचा पान गुंडाळणारा',
+          severity: 'High',
+          treatment: 'Spray Cartap Hydrochloride 50 SP (2g/L) or Chlorantraniliprole 18.5 SC (0.3ml/L). Release Trichogramma egg parasitoids.',
+          notes: 'High severity insect infestation detected on rice leaf blade.',
+          topK: [
+            { index: 0, name: 'rice_leaf_roller', pretty: 'Rice: Rice Leaf Roller', confidence: 0.94, hindi: 'चावल का पत्ता लपेटक', treatment: 'Spray Cartap Hydrochloride 50 SP (2g/L)' },
+            { index: 3, name: 'asiatic_rice_borer', pretty: 'Rice: Asiatic Rice Borer', confidence: 0.03, hindi: 'एशियाई धान तना छेदक', treatment: 'Coragen spray' },
+            { index: 7, name: 'brown_plant_hopper', pretty: 'Rice: Brown Plant Hopper', confidence: 0.01, hindi: 'भूरा फुदका', treatment: 'Pymetrozine 50 WG' }
+          ]
+        };
+      }
       return {
         id: `scan-mock-${Date.now()}`,
         timestamp: new Date().toISOString(),
@@ -177,13 +201,14 @@ export const api = {
         cropHealth: 'Possible Disease Detected',
         cropHealthPercent: 68,
         zoneId,
+        modelType: 'disease',
         notes: 'Simulated AI detection on uploaded image.',
       };
     }
     const formData = new FormData();
     formData.append('file', file);
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/api/images/analyze?zone_id=${encodeURIComponent(zoneId)}`,
+      `${API_CONFIG.BASE_URL}/api/images/analyze?zone_id=${encodeURIComponent(zoneId)}&scan_type=${encodeURIComponent(scanType)}`,
       {
         method: 'POST',
         body: formData,
@@ -193,16 +218,24 @@ export const api = {
     const data = await response.json();
     const top = data.top_prediction || (data.predictions && data.predictions[0]);
     const fullImageUrl = data.image_url ? `${API_CONFIG.BASE_URL}${data.image_url}` : URL.createObjectURL(file);
+    const isPest = top?.model_type === 'pest' || scanType === 'pest';
     return {
       id: `scan-${data.image_id}`,
       timestamp: new Date().toISOString(),
       imageUrl: fullImageUrl,
       diseaseDetection: top?.prediction_class || 'Analysis complete',
       confidence: Math.round((top?.confidence || 0.9) * 100),
-      cropHealth: (data.crop_health as CropAnalysis['cropHealth']) || (top?.is_healthy ? 'Healthy' : 'Possible Disease Detected'),
+      cropHealth: (data.crop_health as CropAnalysis['cropHealth']) || (isPest ? 'Pest Infestation Detected' : top?.is_healthy ? 'Healthy' : 'Possible Disease Detected'),
       cropHealthPercent: data.crop_health_percent ?? (top?.is_healthy ? 95 : 65),
       zoneId: data.zone_id || zoneId,
       notes: top?.treatment || top?.note || 'Edge AI analysis complete.',
+      modelType: (top?.model_type as 'disease' | 'pest') || (isPest ? 'pest' : 'disease'),
+      pestName: top?.pest_name,
+      hindiName: top?.hindi_name,
+      marathiName: top?.marathi_name,
+      severity: top?.severity,
+      treatment: top?.treatment,
+      topK: top?.top_k,
     };
   },
 

@@ -240,7 +240,9 @@ def crop_analysis(db: Session = Depends(get_db)):
       is_healthy = meta.get("is_healthy", False) if meta else False
       cond = meta.get("condition") or (pred.prediction_class if pred else "No disease detected")
       
-      if is_healthy or "healthy" in cond.lower():
+      if pred and pred.model_type == "pest":
+        crop_status = "Pest Infestation Detected"
+      elif is_healthy or "healthy" in cond.lower():
         crop_status = "Healthy"
       elif any(k in cond.lower() for k in ("deficiency", "nitrogen", "nutrient", "phosphorus", "potassium", "magnesium")):
         crop_status = "Possible Nutrient Deficiency"
@@ -258,6 +260,13 @@ def crop_analysis(db: Session = Depends(get_db)):
         "crop_health": crop_status,
         "crop_health_percent": crop_percent,
         "zone_id": img.zone_id,
+        "model_type": pred.model_type if pred else "disease",
+        "pest_name": meta.get("pest_name"),
+        "hindi_name": meta.get("hindi_name"),
+        "marathi_name": meta.get("marathi_name"),
+        "severity": meta.get("severity"),
+        "treatment": meta.get("treatment"),
+        "top_k": meta.get("top_k"),
         "notes": meta.get("treatment") or (meta.get("note") if meta else "Edge AI inference scan."),
       })
     return items
@@ -466,6 +475,7 @@ def ai_results(zone_id: str = "ZONE_B", db: Session = Depends(get_db)):
 @router.post("/images/analyze", response_model=ImageAnalyzeResponse)
 async def analyze_image(
   zone_id: str = "ZONE_B",
+  scan_type: str = "auto",
   file: UploadFile | None = File(None),
   db: Session = Depends(get_db),
 ):
@@ -487,7 +497,7 @@ async def analyze_image(
       raise HTTPException(status_code=503, detail="Camera unavailable")
     source = "camera"
 
-  preds = inference_service.analyze_image(path, zone_id)
+  preds = inference_service.analyze_image(path, zone_id, scan_type=scan_type)
   top_pred = preds[0] if preds else None
 
   # Save image and prediction to database
@@ -500,7 +510,7 @@ async def analyze_image(
     pred_rec = AIPrediction(
       image_id=img_rec.id,
       zone_id=zone_id,
-      model_type="disease",
+      model_type=top_pred.model_type,
       prediction_class=top_pred.prediction_class,
       confidence=top_pred.confidence,
       metadata_json=top_pred.model_dump(),
@@ -517,10 +527,13 @@ async def analyze_image(
   )
   fused = decision_engine.fuse(zone_id, telemetry, preds)
 
-  crop_health = fused.get(
-    "crop_health_status",
-    "Healthy" if (top_pred and top_pred.is_healthy) else "Possible Disease Detected",
-  )
+  if top_pred and top_pred.model_type == "pest":
+    crop_health = "Pest Infestation Detected"
+  else:
+    crop_health = fused.get(
+      "crop_health_status",
+      "Healthy" if (top_pred and top_pred.is_healthy) else "Possible Disease Detected",
+    )
   crop_health_percent = fused.get(
     "crop_health_score",
     90 if (top_pred and top_pred.is_healthy) else 65,
