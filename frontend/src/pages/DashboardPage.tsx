@@ -55,7 +55,7 @@ export function DashboardPage() {
             </div>
             <div className="border-l border-earth-200 pl-4">
               <span className="text-[11px] font-medium text-earth-500 block">Last Update</span>
-              <span className="text-xs font-bold text-earth-900">{dashboard.lastScan}</span>
+              <span className="text-xs font-bold text-earth-900">{dashboard.lastSynchronized || dashboard.lastScan}</span>
             </div>
           </div>
         </div>
@@ -135,7 +135,12 @@ export function DashboardPage() {
               {dashboard.temperature}°C
             </p>
             <p className="mt-1 text-xs text-earth-600 font-medium">
-              Soil: <span className="font-semibold text-earth-900">24.1°C</span> · Air: <span className="font-semibold text-earth-900">25.6°C</span>
+              Soil:{' '}
+              <span className="font-semibold text-earth-900">
+                {dashboard.soilTemperature != null ? `${dashboard.soilTemperature}°C` : '—'}
+              </span>
+              {' '}· Air:{' '}
+              <span className="font-semibold text-earth-900">{dashboard.temperature}°C</span>
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-earth-100 text-xs text-earth-500 font-medium">

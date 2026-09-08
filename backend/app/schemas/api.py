@@ -207,6 +207,7 @@ class DashboardSummary(BaseModel):
     soil_moisture: float
     soil_moisture_status: str
     temperature: float
+    soil_temperature: float | None = None
     soil_ph: float
     soil_ph_status: str
     electrical_conductivity: float
@@ -218,6 +219,8 @@ class DashboardSummary(BaseModel):
     healthy_zones: int
     at_risk_zones: int
     is_demo: bool = True
+    telemetry_zone_id: str | None = None
+    telemetry_source: str | None = None
 
 
 class DashboardNPK(BaseModel):

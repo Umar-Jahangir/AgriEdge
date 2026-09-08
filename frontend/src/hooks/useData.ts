@@ -1,13 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 
-export function useAsyncData<T>(fetcher: () => Promise<T>, deps: unknown[] = []) {
+const TELEMETRY_POLL_MS = 5000;
+
+export function useAsyncData<T>(
+  fetcher: () => Promise<T>,
+  deps: unknown[] = [],
+  intervalMs?: number
+) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refetch = useCallback(async () => {
-    setLoading(true);
+  const refetch = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const result = await fetcher();
@@ -15,19 +23,26 @@ export function useAsyncData<T>(fetcher: () => Promise<T>, deps: unknown[] = [])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load data');
     } finally {
-      setLoading(false);
+      if (!options?.silent) {
+        setLoading(false);
+      }
     }
   }, deps);
 
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    void refetch();
+    if (!intervalMs) return;
+    const id = window.setInterval(() => {
+      void refetch({ silent: true });
+    }, intervalMs);
+    return () => window.clearInterval(id);
+  }, [refetch, intervalMs]);
 
   return { data, loading, error, refetch };
 }
 
 export function useDashboard() {
-  return useAsyncData(() => api.getDashboard());
+  return useAsyncData(() => api.getDashboard(), [], TELEMETRY_POLL_MS);
 }
 
 export function useSoilAnalysis() {
@@ -35,7 +50,7 @@ export function useSoilAnalysis() {
 }
 
 export function useLatestSensors() {
-  return useAsyncData(() => api.getLatestSensors());
+  return useAsyncData(() => api.getLatestSensors(), [], TELEMETRY_POLL_MS);
 }
 
 export function useRecommendations() {

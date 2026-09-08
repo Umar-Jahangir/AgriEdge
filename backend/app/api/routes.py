@@ -49,6 +49,24 @@ validator = SensorValidator()
 esp32 = get_esp32()
 camera = get_camera()
 
+# Latest telemetry received from ESP32 over Wi-Fi.
+# Prototype storage: kept in memory until database persistence is added.
+latest_wifi_telemetry: SensorTelemetry | None = None
+
+
+def _wifi_telemetry_live() -> bool:
+  return latest_wifi_telemetry is not None
+
+
+def _moisture_status(moisture: float) -> str:
+  if moisture < 30:
+    return "Attention Required"
+  if moisture < 38:
+    return "Moderate"
+  if moisture <= 55:
+    return "Optimal"
+  return "Moderate"
+
 
 @router.get("/health", response_model=HealthResponse)
 def health():
@@ -58,7 +76,7 @@ def health():
     version=settings.app_version,
     mock_mode=settings.mock_mode,
     demo_mode=settings.demo_mode,
-    esp32_connected=esp32.is_connected(),
+    esp32_connected=_wifi_telemetry_live() or esp32.is_connected(),
     camera_available=camera.is_available(),
     ai_models_loaded=inference_service.get_model_status(),
   )
@@ -66,11 +84,12 @@ def health():
 
 @router.get("/system-status", response_model=SystemStatusResponse)
 def system_status():
+  sensors_live = _wifi_telemetry_live() or esp32.is_connected()
   return SystemStatusResponse(
     edge_ai="Connected" if any(inference_service.get_model_status().values()) else "Demo Mode",
-    sensors="Connected" if esp32.is_connected() else "Disconnected",
+    sensors="Connected" if sensors_live else "Disconnected",
     backend="Connected",
-    esp32="Connected" if esp32.is_connected() else "Unavailable",
+    esp32="Connected" if sensors_live else "Unavailable",
     camera="Available" if camera.is_available() else "Unavailable",
     internet="Optional",
   )
@@ -129,10 +148,46 @@ def get_zone(zone_id: str):
 
 @router.get("/dashboard", response_model=DashboardSummary)
 def dashboard():
+  # Keep demo zone list / crop-health context; overlay live Wi-Fi telemetry when present.
   zone_b = get_demo_zone("ZONE_B")
   rover = get_rover_status()
   zones = get_all_demo_zones()
   at_risk = sum(1 for z in zones if z["risk_level"] in ("MEDIUM", "HIGH"))
+
+  soil_moisture = zone_b["soil_moisture"]
+  soil_temperature = zone_b.get("soil_temperature")
+  air_temperature = zone_b["air_temperature"]
+  soil_ph = zone_b["ph"]
+  ec = zone_b["ec"]
+  nitrogen = zone_b["nitrogen"]
+  phosphorus = zone_b["phosphorus"]
+  potassium = zone_b["potassium"]
+  telemetry_zone_id = None
+  telemetry_source = None
+  is_demo = settings.demo_mode
+
+  live = latest_wifi_telemetry
+  if live is not None:
+    telemetry_zone_id = live.zone_id
+    telemetry_source = "api"
+    is_demo = False
+    if live.soil_moisture is not None:
+      soil_moisture = live.soil_moisture
+    if live.soil_temperature is not None:
+      soil_temperature = live.soil_temperature
+    if live.air_temperature is not None:
+      air_temperature = live.air_temperature
+    if live.ph is not None:
+      soil_ph = live.ph
+    if live.ec is not None:
+      ec = live.ec
+    if live.nitrogen is not None:
+      nitrogen = live.nitrogen
+    if live.phosphorus is not None:
+      phosphorus = live.phosphorus
+    if live.potassium is not None:
+      potassium = live.potassium
+
   return DashboardSummary(
     farm_status="Attention Required" if at_risk > 0 else "Healthy",
     farm_name="Demo Farm",
@@ -141,19 +196,20 @@ def dashboard():
     connectivity="Connected",
     soil_condition_score=zone_b["soil_score"],
     soil_condition_status="Moderate",
-    soil_moisture=zone_b["soil_moisture"],
-    soil_moisture_status="Attention Required",
-    temperature=zone_b["air_temperature"],
-    soil_ph=zone_b["ph"],
+    soil_moisture=soil_moisture,
+    soil_moisture_status=_moisture_status(soil_moisture),
+    temperature=air_temperature,
+    soil_temperature=soil_temperature,
+    soil_ph=soil_ph,
     soil_ph_status="Optimal",
-    electrical_conductivity=zone_b["ec"],
+    electrical_conductivity=ec,
     npk=DashboardNPK(
-      nitrogen=zone_b["nitrogen"],
-      phosphorus=zone_b["phosphorus"],
-      potassium=zone_b["potassium"],
-      nitrogen_status="Good" if zone_b["nitrogen"] >= 50 else "Moderate",
-      phosphorus_status="Good" if zone_b["phosphorus"] >= 30 else "Moderate",
-      potassium_status="Good" if zone_b["potassium"] >= 45 else "Moderate",
+      nitrogen=nitrogen,
+      phosphorus=phosphorus,
+      potassium=potassium,
+      nitrogen_status="Good" if nitrogen >= 50 else "Moderate",
+      phosphorus_status="Good" if phosphorus >= 30 else "Moderate",
+      potassium_status="Good" if potassium >= 45 else "Moderate",
       timestamp=datetime.utcnow().isoformat(),
     ),
     crop_health=zone_b["crop_health"],
@@ -162,26 +218,52 @@ def dashboard():
     active_alerts=at_risk,
     healthy_zones=len(zones) - at_risk,
     at_risk_zones=at_risk,
-    is_demo=settings.demo_mode,
+    is_demo=is_demo,
+    telemetry_zone_id=telemetry_zone_id,
+    telemetry_source=telemetry_source,
   )
 
 
 @router.get("/sensors/latest", response_model=SensorReadingResponse)
-def latest_sensors(zone_id: str = "ZONE_B"):
-  telemetry = esp32.read_telemetry()
-  if telemetry:
-    telemetry.zone_id = zone_id
-    validated, _ = validator.validate(telemetry)
-    return SensorReadingResponse(id="latest", source="esp32" if not settings.mock_mode else "mock", **validated.model_dump())
-  z = get_demo_zone(zone_id)
-  return SensorReadingResponse(
-    id="latest", zone_id=zone_id, source="demo",
-    soil_moisture=z["soil_moisture"], soil_temperature=z["soil_temperature"],
-    ph=z["ph"], ec=z["ec"], nitrogen=z["nitrogen"],
-    phosphorus=z["phosphorus"], potassium=z["potassium"],
-    air_temperature=z["air_temperature"], humidity=z["humidity"],
-    timestamp=datetime.utcnow(),
-  )
+def latest_sensors(zone_id: str = "ZONE_A"):
+    # Prefer the latest ESP32 Wi-Fi telemetry.
+    if latest_wifi_telemetry is not None:
+        return SensorReadingResponse(
+            id="latest",
+            source="api",
+            **latest_wifi_telemetry.model_dump()
+        )
+
+    # Legacy Serial ESP32 fallback.
+    telemetry = esp32.read_telemetry()
+    if telemetry:
+        telemetry.zone_id = zone_id
+        validated, _ = validator.validate(telemetry)
+
+        return SensorReadingResponse(
+            id="latest",
+            source="esp32",
+            **validated.model_dump()
+        )
+
+    # Final fallback: existing demo data.
+    z = get_demo_zone(zone_id)
+
+    return SensorReadingResponse(
+        id="latest",
+        zone_id=zone_id,
+        source="demo",
+        soil_moisture=z["soil_moisture"],
+        soil_temperature=z["soil_temperature"],
+        ph=z["ph"],
+        ec=z["ec"],
+        nitrogen=z["nitrogen"],
+        phosphorus=z["phosphorus"],
+        potassium=z["potassium"],
+        air_temperature=z["air_temperature"],
+        humidity=z["humidity"],
+        timestamp=datetime.utcnow(),
+    )
 
 
 def _history_points(values: list[float]) -> list[dict]:
@@ -422,10 +504,18 @@ def analytics(range: str = "7d"):
 
 @router.post("/sensors/telemetry", response_model=SensorReadingResponse)
 def ingest_telemetry(data: SensorTelemetry, db: Session = Depends(get_db)):
-  validated, warnings = validator.validate(data)
-  # TODO: persist to database
-  return SensorReadingResponse(id="ingested", source="api", **validated.model_dump())
+    global latest_wifi_telemetry
 
+    validated, warnings = validator.validate(data)
+
+    # Store the latest ESP32 Wi-Fi telemetry in memory.
+    latest_wifi_telemetry = validated
+
+    return SensorReadingResponse(
+        id="ingested",
+        source="api",
+        **validated.model_dump()
+    )
 
 @router.get("/ai/results", response_model=AIAnalysisResult)
 def ai_results(zone_id: str = "ZONE_B", db: Session = Depends(get_db)):

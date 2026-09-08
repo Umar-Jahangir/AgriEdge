@@ -233,6 +233,7 @@ export interface DashboardSummary {
   soilMoisture: number;
   soilMoistureStatus: HealthStatus;
   temperature: number;
+  soilTemperature?: number | null;
   soilPh: number;
   soilPhStatus: HealthStatus;
   electricalConductivity: number;
@@ -241,6 +242,9 @@ export interface DashboardSummary {
   waterStress: RiskLevel;
   lastSynchronized: string;
   farmName: string;
+  isDemo?: boolean;
+  telemetryZoneId?: string | null;
+  telemetrySource?: string | null;
 }
 
 export interface AIAnalysisResult {
